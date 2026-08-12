@@ -5,6 +5,7 @@ import ProtectedRoute from './portal-app/lib/ProtectedRoute'
 import Login from './portal-app/screens/Login'
 import Dashboard from './portal-app/screens/Dashboard'
 import Questionnaire from './portal-app/screens/enrollment/Questionnaire'
+import Statements from './portal-app/screens/Statements'
 import ComingSoon from './portal-app/screens/ComingSoon'
 
 export default function App() {
@@ -20,7 +21,7 @@ export default function App() {
               <Route path="/enrollment" element={<Questionnaire />} />
               <Route path="/profile" element={<ComingSoon title="Profile" />} />
               <Route path="/transactions" element={<ComingSoon title="Transactions" />} />
-              <Route path="/statements" element={<ComingSoon title="Account Statements" />} />
+              <Route path="/statements" element={<Statements />} />
               <Route path="/investments" element={<ComingSoon title="Investment Portfolio" />} />
             </Route>
 

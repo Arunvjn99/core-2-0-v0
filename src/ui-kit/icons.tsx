@@ -14,6 +14,7 @@ import {
   faBell,
   faGear,
   faChevronRight,
+  faChevronDown,
   faWandMagicSparkles,
   faCircleInfo,
   faEye,
@@ -23,6 +24,11 @@ import {
   faDesktop,
   faBars,
   faXmark,
+  faMagnifyingGlass,
+  faCalendar,
+  faArrowRotateRight,
+  faFileExport,
+  faDownload,
 } from '@fortawesome/free-solid-svg-icons'
 
 type IconProps = { className?: string }
@@ -42,6 +48,7 @@ export const IconInvestment = wrap(faSackDollar)
 export const IconBell = wrap(faBell)
 export const IconGear = wrap(faGear)
 export const IconChevronRight = wrap(faChevronRight)
+export const IconChevronDown = wrap(faChevronDown)
 export const IconSparkles = wrap(faWandMagicSparkles)
 export const IconInfo = wrap(faCircleInfo)
 export const IconEye = wrap(faEye)
@@ -51,3 +58,8 @@ export const IconMoon = wrap(faMoon)
 export const IconDesktop = wrap(faDesktop)
 export const IconMenu = wrap(faBars)
 export const IconClose = wrap(faXmark)
+export const IconSearch = wrap(faMagnifyingGlass)
+export const IconCalendar = wrap(faCalendar)
+export const IconReset = wrap(faArrowRotateRight)
+export const IconFileExport = wrap(faFileExport)
+export const IconDownload = wrap(faDownload)
