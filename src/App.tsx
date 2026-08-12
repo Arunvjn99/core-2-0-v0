@@ -10,6 +10,9 @@ import Statements from './portal-app/screens/Statements'
 import Investments from './portal-app/screens/Investments'
 import Transactions from './portal-app/screens/Transactions'
 import Profile from './portal-app/screens/Profile'
+import AdminClients from './admin-app/screens/Clients'
+import AdminThemeEditor from './admin-app/screens/ThemeEditor'
+import AdminModuleToggles from './admin-app/screens/ModuleToggles'
 
 export default function App() {
   return (
@@ -27,6 +30,11 @@ export default function App() {
               <Route path="/transactions" element={<Transactions />} />
               <Route path="/statements" element={<Statements />} />
               <Route path="/investments" element={<Investments />} />
+
+              <Route path="/admin/clients" element={<AdminClients />} />
+              <Route path="/admin/theme" element={<AdminThemeEditor />} />
+              <Route path="/admin/modules" element={<AdminModuleToggles />} />
+              <Route path="/admin" element={<Navigate to="/admin/clients" replace />} />
             </Route>
 
             <Route path="/" element={<Navigate to="/dashboard" replace />} />

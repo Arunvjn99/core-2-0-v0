@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { NavLink } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import {
   IconGrid,
   IconEnrollment,
@@ -15,31 +15,35 @@ import {
 import { ThemeToggle } from '../primitives/ThemeToggle'
 import { useAuth } from '../../portal-app/lib/AuthContext'
 import { useTheme } from '../../portal-app/lib/ThemeContext'
+import { useClientConfig } from '../../portal-app/lib/useClientConfig'
 import wordmark from '../../assets/login/wordmark.svg'
 
 /**
  * Figma: Navbar (node 2870:766) + Menubar (node 2893:57019), shared across
- * all authenticated portal screens. Module visibility is admin-config-gated
- * (see admin-app plan) — for now all six modules render.
+ * all authenticated portal screens. Module visibility is gated by the
+ * admin console (core2.module_config) via useClientConfig — a client with
+ * a module disabled just doesn't see it in this nav, no rebuild needed.
  *
  * Responsive: sidebar is icon+label rail at lg+ (matches Figma desktop),
  * collapses to a slide-out drawer behind a hamburger below lg (no mobile
  * nav frame in the source file for this shell, so this is our own call).
  */
 const NAV_ITEMS = [
-  { to: '/dashboard', label: 'Dashboard', icon: IconGrid },
-  { to: '/enrollment', label: 'Enrollment', icon: IconEnrollment },
-  { to: '/profile', label: 'Profile', icon: IconProfile },
-  { to: '/transactions', label: 'Transaction', icon: IconTransaction },
-  { to: '/statements', label: 'Account Statements', icon: IconStatements },
-  { to: '/investments', label: 'Investment Portfolio', icon: IconInvestment },
+  { to: '/dashboard', label: 'Dashboard', icon: IconGrid, moduleKey: 'dashboard' },
+  { to: '/enrollment', label: 'Enrollment', icon: IconEnrollment, moduleKey: 'enrollment' },
+  { to: '/profile', label: 'Profile', icon: IconProfile, moduleKey: 'profile' },
+  { to: '/transactions', label: 'Transaction', icon: IconTransaction, moduleKey: 'transactions' },
+  { to: '/statements', label: 'Account Statements', icon: IconStatements, moduleKey: 'statements' },
+  { to: '/investments', label: 'Investment Portfolio', icon: IconInvestment, moduleKey: 'investments' },
 ]
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { session, signOut } = useAuth()
   const { resolved } = useTheme()
+  const { enabledModules } = useClientConfig()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const name = (session?.user.user_metadata?.full_name as string | undefined) ?? session?.user.email ?? 'Participant'
+  const visibleItems = enabledModules ? NAV_ITEMS.filter((i) => enabledModules.has(i.moduleKey)) : NAV_ITEMS
 
   return (
     <div className="min-h-svh bg-core-bg">
@@ -59,9 +63,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           <button className="rounded-full p-2 text-core-text hover:bg-core-bg" aria-label="Notifications">
             <IconBell className="size-4" />
           </button>
-          <button className="rounded-full p-2 text-core-text hover:bg-core-bg" aria-label="Settings">
+          <Link to="/admin" className="rounded-full p-2 text-core-text hover:bg-core-bg" aria-label="Admin console">
             <IconGear className="size-4" />
-          </button>
+          </Link>
           <button
             onClick={() => void signOut()}
             className="flex items-center gap-2 rounded-full border border-core-border p-1 pr-3 text-[14px] font-medium text-core-text hover:bg-core-bg"
@@ -77,7 +81,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="flex">
         {/* Desktop rail */}
         <nav className="sticky top-[72px] hidden h-[calc(100svh-72px)] w-24 shrink-0 flex-col border-r border-core-border bg-core-surface shadow-[1px_4px_6px_rgba(0,0,0,0.14)] lg:flex">
-          <NavItems />
+          <NavItems items={visibleItems} />
         </nav>
 
         {/* Mobile drawer */}
@@ -95,7 +99,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   <IconClose className="size-4" />
                 </button>
               </div>
-              <NavItems horizontal onNavigate={() => setDrawerOpen(false)} />
+              <NavItems items={visibleItems} horizontal onNavigate={() => setDrawerOpen(false)} />
             </nav>
           </div>
         )}
@@ -106,10 +110,18 @@ export function AppShell({ children }: { children: ReactNode }) {
   )
 }
 
-function NavItems({ horizontal = false, onNavigate }: { horizontal?: boolean; onNavigate?: () => void }) {
+function NavItems({
+  items,
+  horizontal = false,
+  onNavigate,
+}: {
+  items: typeof NAV_ITEMS
+  horizontal?: boolean
+  onNavigate?: () => void
+}) {
   return (
     <>
-      {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+      {items.map(({ to, label, icon: Icon }) => (
         <NavLink
           key={to}
           to={to}
