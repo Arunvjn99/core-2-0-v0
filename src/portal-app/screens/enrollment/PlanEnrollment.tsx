@@ -4,6 +4,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { AppShell } from '../../../ui-kit/patterns/AppShell'
 import { RiskGauge } from '../../../ui-kit/patterns/RiskGauge'
 import { Button } from '../../../ui-kit/primitives/Button'
+import { Modal } from '../../../ui-kit/primitives/Modal'
 import { useAuth } from '../../lib/AuthContext'
 import { useToast } from '../../../ui-kit/lib/ToastContext'
 import {
@@ -17,9 +18,10 @@ import {
 
 /**
  * Figma: "Plan Enrollment" 4-step wizard (nodes 2893:56254 Contribution,
- * 2893:58119/58477 Auto Increment, 2893:64916 Investments, 2893:59711/
- * 60247 Review) — the real "Enroll" flow triggered from a Dashboard plan
- * card, distinct from the risk-profile Questionnaire at /enrollment.
+ * 2893:58119 Auto Increase cards + 2893:58477 "Compound your savings"
+ * modal, 2893:64916 Investments, 2893:59711/60247 Review) — the real
+ * "Enroll" flow triggered from a Dashboard plan card, distinct from the
+ * risk-profile Questionnaire at /enrollment.
  */
 const STEPS = ['Contribution Election', 'Auto Increase', 'Investment Election', 'Review'] as const
 type Step = (typeof STEPS)[number]
@@ -81,7 +83,7 @@ export default function PlanEnrollment() {
                   key={s}
                   onClick={() => {
                     if (i > stepIndex) return
-                    setDirection(i > stepIndex ? 1 : -1)
+                    setDirection(-1)
                     setStepIndex(i)
                   }}
                   disabled={i > stepIndex}
@@ -113,6 +115,23 @@ export default function PlanEnrollment() {
 
           {/* Step content */}
           <div className="flex-1 overflow-hidden p-6">
+            {/* Enrollment plan header — present on every step in Figma */}
+            <div className="mb-6 flex flex-col items-start justify-between gap-3 border-b border-core-border pb-4 sm:flex-row sm:items-center">
+              <div>
+                <p className="text-[13px] text-core-text-muted">Enrolment Plan Details</p>
+                <p className="text-[18px] font-semibold text-core-text">{PLAN.name}</p>
+                <p className="text-[13px] text-core-text-muted">
+                  Plan ID <span className="font-medium text-core-text">{PLAN.id}</span> · Regular Plan
+                </p>
+              </div>
+              <div className="flex flex-col items-end">
+                <span className="mb-1 rounded-full bg-core-warning-bg px-2 py-0.5 text-[12px] font-semibold text-core-warning">
+                  Moderate Investor
+                </span>
+                <RiskGauge level="Moderate" />
+              </div>
+            </div>
+
             <AnimatePresence mode="wait" custom={direction} initial={false}>
               <motion.div
                 key={step}
@@ -268,45 +287,199 @@ function RateRows({ rates }: { rates: Omit<Contribution, 'mode'> }) {
   )
 }
 
+/**
+ * Figma 2893:58119 — three illustrated option cards (No / Plan Default /
+ * Manual Auto Increase), each opening the "Compound your savings" modal
+ * (2893:58477) to configure the increment cycle and per-source rates.
+ */
+const INCREASE_MODES = [
+  {
+    id: 'none' as const,
+    title: 'No Auto Increase',
+    icon: '📄',
+    blurb: 'Make the same contribution each year.',
+    heading: 'Disable Automatic Contribution Increases',
+    body: 'Turn off automatic yearly increases in your plan contributions. This means your contribution amount will remain the same each year.',
+    cta: 'Disable Auto Increase',
+  },
+  {
+    id: 'plan_default' as const,
+    title: 'Plan Default Auto Increase',
+    icon: '📈',
+    blurb: 'We will increase your savings each year automatically.',
+    heading: 'Boost your savings by enabling auto increase',
+    body: "To call out each source's auto deferral increase percentage %, set up in the plan.",
+    cta: 'Enable Auto Increase',
+  },
+  {
+    id: 'manual' as const,
+    title: 'Manual Auto Increase',
+    icon: '🖊️',
+    blurb: 'You choose how much to increase your savings, each year.',
+    heading: 'I will customise by myself',
+    body: '',
+    cta: 'Setup Auto Increase',
+  },
+]
+
 function AutoIncreaseStep({ value, onChange }: { value: AutoIncrease; onChange: (v: AutoIncrease) => void }) {
+  const [modalOpen, setModalOpen] = useState(false)
+  const activeMode = !value.enabled ? 'none' : 'plan_default'
+
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-[16px] font-semibold text-core-text">Auto Increase</h2>
-          <p className="text-[14px] text-core-text-muted">Automatically raise your contribution rate each year.</p>
-        </div>
-        <button
-          role="switch"
-          aria-checked={value.enabled}
-          onClick={() => onChange({ ...value, enabled: !value.enabled })}
-          className={`relative h-[22px] w-[42px] rounded-full transition-colors ${value.enabled ? 'bg-core-info' : 'bg-core-border-strong'}`}
-        >
-          <span className={`absolute top-[3px] size-4 rounded-full bg-white transition-all ${value.enabled ? 'left-[21px]' : 'left-[3px]'}`} />
-        </button>
+      <div>
+        <h2 className="text-[16px] font-semibold text-core-text">What is Auto Increase?</h2>
+        <p className="text-[14px] text-core-text-muted">
+          Automatically increases your contributions (savings) each year to help you grow your retirement funds,
+          faster.
+        </p>
       </div>
 
-      {value.enabled && (
-        <div className="grid gap-4 sm:grid-cols-3">
-          <NumberField label="Pre-tax increase % / yr" value={value.pretaxRate} onChange={(n) => onChange({ ...value, pretaxRate: n })} />
-          <NumberField label="After-tax increase % / yr" value={value.afterTaxRate} onChange={(n) => onChange({ ...value, afterTaxRate: n })} />
-          <NumberField label="Limit %" value={value.limit} onChange={(n) => onChange({ ...value, limit: n })} />
-        </div>
+      <div className="grid gap-4 md:grid-cols-3">
+        {INCREASE_MODES.map((mode) => (
+          <div
+            key={mode.id}
+            className={`flex flex-col rounded-core-md border p-4 ${
+              activeMode === mode.id ? 'border-core-info bg-core-info/5' : 'border-core-border-strong'
+            }`}
+          >
+            <div className="mb-3 flex items-start justify-between gap-2">
+              <p className="text-[15px] font-semibold text-core-info">{mode.title}</p>
+              <span className="text-2xl leading-none">{mode.icon}</span>
+            </div>
+            <p className="mb-4 text-[13px] text-core-text-muted">{mode.blurb}</p>
+            <p className="mb-1 text-[14px] font-semibold text-core-text">{mode.heading}</p>
+            {mode.body && <p className="mb-4 flex-1 text-[13px] leading-relaxed text-core-text-muted">{mode.body}</p>}
+            <Button
+              variant={activeMode === mode.id ? 'cta' : 'secondary'}
+              className="mt-auto w-full justify-center"
+              onClick={() => {
+                if (mode.id === 'none') {
+                  onChange({ ...value, enabled: false })
+                } else {
+                  setModalOpen(true)
+                }
+              }}
+            >
+              {mode.cta}
+            </Button>
+          </div>
+        ))}
+      </div>
+
+      {modalOpen && (
+        <CompoundSavingsModal value={value} onChange={onChange} onClose={() => setModalOpen(false)} />
       )}
     </div>
   )
 }
 
+function CompoundSavingsModal({
+  value,
+  onChange,
+  onClose,
+}: {
+  value: AutoIncrease
+  onChange: (v: AutoIncrease) => void
+  onClose: () => void
+}) {
+  const [cycle, setCycle] = useState<'calendar' | 'participant' | 'plan_year'>('calendar')
+  const [draft, setDraft] = useState(value)
+
+  function apply() {
+    onChange({ ...draft, enabled: true })
+    onClose()
+  }
+
+  return (
+    <Modal title="Compound your savings" onClose={onClose} width={720}>
+      <div className="grid gap-6 sm:grid-cols-[220px_1fr]">
+        <div className="flex flex-col gap-2">
+          {[
+            { id: 'none', label: 'No Auto Increase', sub: 'Make the same contribution each year.' },
+            { id: 'auto', label: 'Auto Increase', sub: 'We will increase your savings each year automatically.' },
+            { id: 'manual', label: 'Manual Auto Increase', sub: 'You choose how much to increase your savings, each year.' },
+          ].map((opt) => (
+            <button
+              key={opt.id}
+              onClick={() => opt.id === 'none' && onChange({ ...draft, enabled: false }) && onClose()}
+              className={`rounded-core-sm border p-3 text-left ${
+                opt.id === 'auto' ? 'border-core-info bg-core-info/5' : 'border-core-border'
+              }`}
+            >
+              <p className="text-[14px] font-semibold text-core-text">{opt.label}</p>
+              <p className="text-[12px] text-core-text-muted">{opt.sub}</p>
+            </button>
+          ))}
+        </div>
+
+        <div className="flex flex-col gap-5">
+          <div>
+            <p className="mb-2 text-[14px] font-semibold text-core-text">Increment Cycle</p>
+            <div className="flex flex-col gap-2">
+              {[
+                { id: 'calendar' as const, label: 'Calendar Year (Every Jan 1st)', next: 'Next increase on Jan 1, 2027' },
+                { id: 'participant' as const, label: "Plan participant date (Every year on your plan enrollment date)", next: 'Next increase on Aug 15, 2026' },
+                { id: 'plan_year' as const, label: 'Plan Year (Every April 1)', next: 'Next increase on Apr 1, 2027' },
+              ].map((opt) => (
+                <label key={opt.id} className="flex items-start gap-2 text-[13px]">
+                  <input
+                    type="radio"
+                    name="increment-cycle"
+                    checked={cycle === opt.id}
+                    onChange={() => setCycle(opt.id)}
+                    className="mt-0.5 accent-[var(--core-color-info)]"
+                  />
+                  <span>
+                    <span className="font-medium text-core-text">{opt.label}</span>
+                    <br />
+                    <span className="text-core-text-muted">{opt.next}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {(['Pre tax', 'Roth', 'After tax'] as const).map((label, i) => {
+            const key = i === 0 ? 'pretaxRate' : i === 1 ? 'afterTaxRate' : 'afterTaxRate'
+            return (
+              <div key={label} className="border-t border-core-border pt-4">
+                <p className="mb-2 text-[14px] font-semibold text-core-text">{label}</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <NumberField
+                    label="Increment — how much to increase each cycle"
+                    value={draft[key as 'pretaxRate' | 'afterTaxRate']}
+                    onChange={(n) => setDraft((d) => ({ ...d, [key]: n }))}
+                  />
+                  <NumberField label="Max Limit — highest you want to reach" value={draft.limit} onChange={(n) => setDraft((d) => ({ ...d, limit: n }))} />
+                </div>
+              </div>
+            )
+          })}
+
+          <Button variant="cta" onClick={apply} className="w-fit self-end">
+            Save
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  )
+}
+
 function NumberField({ label, value, onChange }: { label: string; value: number; onChange: (n: number) => void }) {
   return (
-    <label className="flex flex-col gap-1.5 text-[13px] font-medium text-core-text-muted">
+    <label className="flex flex-col gap-1.5 text-[12px] font-medium text-core-text-muted">
       {label}
-      <input
-        type="number"
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="rounded border border-core-border bg-core-bg px-3 py-2 text-[15px] text-core-text"
-      />
+      <div className="flex items-center rounded border border-core-border bg-core-bg px-2 py-1.5">
+        <input
+          type="number"
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          className="w-full bg-transparent text-[14px] text-core-text outline-none"
+        />
+        <span className="text-core-text-muted">%</span>
+      </div>
     </label>
   )
 }
@@ -355,20 +528,6 @@ function ReviewStep({
 }) {
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between rounded-core-md bg-core-warning-bg p-4">
-        <div>
-          <p className="text-[13px] text-core-text-muted">You are a</p>
-          <p className="text-[16px] font-semibold text-core-warning">Moderate Investor</p>
-        </div>
-        <RiskGauge level="Moderate" />
-      </div>
-
-      <div>
-        <p className="text-[13px] text-core-text-muted">Plan Details</p>
-        <p className="text-[16px] font-semibold text-core-text">{PLAN.name}</p>
-        <p className="text-[13px] text-core-text-muted">Plan ID {PLAN.id} · Type 401(K)</p>
-      </div>
-
       <div>
         <h3 className="mb-2 text-[14px] font-semibold text-core-text">Contribution Election</h3>
         <RateRows rates={contribution} />
