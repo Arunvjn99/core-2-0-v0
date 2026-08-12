@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { useReducedMotion } from 'framer-motion'
 import { AppShell } from '../../../ui-kit/patterns/AppShell'
 import { RiskGauge } from '../../../ui-kit/patterns/RiskGauge'
 import { Button } from '../../../ui-kit/primitives/Button'
 import { Modal } from '../../../ui-kit/primitives/Modal'
+import { IconSparkles } from '../../../ui-kit/icons'
 import { useAuth } from '../../lib/AuthContext'
 import { useToast } from '../../../ui-kit/lib/ToastContext'
 import {
@@ -41,7 +42,9 @@ export default function PlanEnrollment() {
   const navigate = useNavigate()
   const reduceMotion = useReducedMotion()
   const [stepIndex, setStepIndex] = useState(0)
-  const [direction, setDirection] = useState(1)
+  // direction (forward/back) is tracked for a possible future re-add of a
+  // directional transition — see the note above the step content render.
+  const [, setDirection] = useState(1)
   const [contribution, setContribution] = useState<Contribution>({ mode: 'plan_default', ...CONTRIBUTION_PRESETS.plan_default })
   const [autoIncrease, setAutoIncrease] = useState<AutoIncrease>({ enabled: false, pretaxRate: 5, afterTaxRate: 5, limit: 15 })
   const [investments, setInvestments] = useState<EnrollmentInvestments>({ mode: 'plan_default', autoRebalance: true })
@@ -114,45 +117,52 @@ export default function PlanEnrollment() {
           </div>
 
           {/* Step content */}
-          <div className="flex-1 overflow-hidden p-6">
-            {/* Enrollment plan header — present on every step in Figma */}
-            <div className="mb-6 flex flex-col items-start justify-between gap-3 border-b border-core-border pb-4 sm:flex-row sm:items-center">
-              <div>
-                <p className="text-[13px] text-core-text-muted">Enrolment Plan Details</p>
-                <p className="text-[18px] font-semibold text-core-text">{PLAN.name}</p>
-                <p className="text-[13px] text-core-text-muted">
-                  Plan ID <span className="font-medium text-core-text">{PLAN.id}</span> · Regular Plan
-                </p>
+          <div className={`flex-1 overflow-hidden ${step === 'Review' ? '' : 'p-6'}`}>
+            {/* Enrollment plan header — present on steps 1-3 in Figma; Review has its own layout */}
+            {step !== 'Review' && (
+              <div className="mb-6 flex flex-col items-start justify-between gap-3 border-b border-core-border pb-4 sm:flex-row sm:items-center">
+                <div>
+                  <p className="text-[13px] text-core-text-muted">Enrolment Plan Details</p>
+                  <p className="text-[18px] font-semibold text-core-text">{PLAN.name}</p>
+                  <p className="text-[13px] text-core-text-muted">
+                    Plan ID <span className="font-medium text-core-text">{PLAN.id}</span> · Regular Plan
+                  </p>
+                </div>
+                <div className="flex flex-col items-end">
+                  <span className="mb-1 rounded-full bg-core-warning-bg px-2 py-0.5 text-[12px] font-semibold text-core-warning">
+                    Moderate Investor
+                  </span>
+                  <RiskGauge level="Moderate" />
+                </div>
               </div>
-              <div className="flex flex-col items-end">
-                <span className="mb-1 rounded-full bg-core-warning-bg px-2 py-0.5 text-[12px] font-semibold text-core-warning">
-                  Moderate Investor
-                </span>
-                <RiskGauge level="Moderate" />
-              </div>
-            </div>
+            )}
 
-            <AnimatePresence mode="wait" custom={direction} initial={false}>
-              <motion.div
-                key={step}
-                custom={direction}
-                initial={reduceMotion ? undefined : { opacity: 0, x: direction * 24 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={reduceMotion ? undefined : { opacity: 0, x: direction * -24 }}
-                transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-              >
-                {step === 'Contribution Election' && (
-                  <ContributionStep value={contribution} onChange={setContribution} />
-                )}
-                {step === 'Auto Increase' && <AutoIncreaseStep value={autoIncrease} onChange={setAutoIncrease} />}
-                {step === 'Investment Election' && (
-                  <InvestmentStep value={investments} onChange={setInvestments} />
-                )}
-                {step === 'Review' && (
-                  <ReviewStep contribution={contribution} autoIncrease={autoIncrease} investments={investments} />
-                )}
-              </motion.div>
-            </AnimatePresence>
+            {/*
+              NOTE: this used to be wrapped in framer-motion's AnimatePresence
+              (mode="wait", keyed by step) for a slide transition between
+              steps. In testing, that wrapper reliably got stuck after the
+              first transition — the exit animation never resolved, so the
+              old step's content stayed on screen forever even though the
+              tracker sidebar correctly advanced. Confirmed via direct DOM
+              inspection, not just visually, and reproduced across full
+              dev-server + fresh-tab restarts, so it's a real incompatibility
+              (framer-motion 13.x in this React 19 setup), not test flakiness.
+              Simple keyed remount below has the same "swap on step change"
+              effect without the animation library in the way; a CSS-only
+              fade can be reintroduced later if desired.
+            */}
+            <div key={step} className={reduceMotion ? undefined : 'core2-step-fade'}>
+              {step === 'Contribution Election' && (
+                <ContributionStep value={contribution} onChange={setContribution} />
+              )}
+              {step === 'Auto Increase' && <AutoIncreaseStep value={autoIncrease} onChange={setAutoIncrease} />}
+              {step === 'Investment Election' && (
+                <InvestmentStep value={investments} onChange={setInvestments} />
+              )}
+              {step === 'Review' && (
+                <ReviewStep contribution={contribution} autoIncrease={autoIncrease} investments={investments} />
+              )}
+            </div>
 
             {error && <p className="mt-4 text-[14px] text-core-critical">{error}</p>}
           </div>
@@ -517,6 +527,13 @@ function InvestmentStep({ value, onChange }: { value: EnrollmentInvestments; onC
   )
 }
 
+/**
+ * Figma 2893:59711 — Review is NOT a simple summary list. It's a 3-column
+ * layout: step tracker (rendered by the parent) | Retirement Goal
+ * Simulator (donut + funding shortfall report) | Summary (risk pill +
+ * every election made). Rebuilt to match after the first pass missed this
+ * entirely and just listed the elections.
+ */
 function ReviewStep({
   contribution,
   autoIncrease,
@@ -526,29 +543,133 @@ function ReviewStep({
   autoIncrease: AutoIncrease
   investments: EnrollmentInvestments
 }) {
+  // TODO: this is a demo projection, not a real retirement calculator —
+  // wire up to actual salary/contribution/years-to-retirement inputs once
+  // that data model exists.
+  const goalPct = 50
+  const expected = 20000
+  const allIncome = 10000
+  const shortfall = 10000
+
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h3 className="mb-2 text-[14px] font-semibold text-core-text">Contribution Election</h3>
-        <RateRows rates={contribution} />
+    <div className="flex flex-col lg:flex-row">
+      {/* Simulator */}
+      <div className="flex-1 border-b border-core-border bg-[#fdf6ec] p-6 lg:border-b-0 lg:border-r">
+        <div className="mb-6 flex items-center gap-2">
+          <span className="text-xl" aria-hidden>🏖️</span>
+          <h2 className="text-[16px] font-semibold text-core-text">Your Retirement Goal Simulator</h2>
+        </div>
+
+        <div className="flex flex-col items-center gap-1 py-4">
+          <div
+            className="flex size-[150px] items-center justify-center rounded-full"
+            style={{
+              background: `conic-gradient(#2dd4bf 0% 25%, #ef4444 25% 45%, #facc15 45% 70%, #7c3aed 70% 100%)`,
+            }}
+          >
+            <div className="flex size-[110px] flex-col items-center justify-center rounded-full bg-[#fdf6ec]">
+              <p className="text-[22px] font-bold text-core-text">{goalPct}%</p>
+              <p className="text-[12px] text-core-text-muted">Reached</p>
+            </div>
+          </div>
+          <p className="mt-2 text-[28px] font-bold text-core-warning">{goalPct}%</p>
+          <p className="text-[14px] text-core-text-muted">of your retirement goal is achieved.</p>
+          <button className="mt-3 flex items-center gap-2 rounded-core-sm bg-core-info px-4 py-2 text-[13px] font-semibold text-white">
+            <IconSparkles className="size-3.5" />
+            Optimize your score
+          </button>
+        </div>
+
+        <div className="rounded-core-md bg-core-surface p-4 shadow-core-sm">
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-[14px] font-semibold text-core-text">Your Funding Plan Report</p>
+            <a href="#details" className="text-[13px] font-semibold text-core-info">
+              View Details ›
+            </a>
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-[13px]">
+            <div>
+              <p className="text-core-text-muted">Expected</p>
+              <p className="font-semibold text-core-text">${expected.toLocaleString()}</p>
+            </div>
+            <div>
+              <p className="text-core-text-muted">● All income</p>
+              <p className="font-semibold text-core-text">${allIncome.toLocaleString()}</p>
+            </div>
+            <div>
+              <p className="text-core-critical">● Shortfall</p>
+              <p className="font-semibold text-core-critical">${shortfall.toLocaleString()}</p>
+            </div>
+          </div>
+          <p className="mt-3 text-[11px] italic text-core-text-muted">
+            *Not guaranteed results. It's just a simulation. For more details <span className="underline">Read more</span>
+          </p>
+        </div>
       </div>
 
-      <div>
-        <h3 className="mb-2 text-[14px] font-semibold text-core-text">Auto Increase</h3>
-        {autoIncrease.enabled ? (
-          <RateRows rates={{ pretax: autoIncrease.pretaxRate, roth: 0, afterTax: autoIncrease.afterTaxRate }} />
-        ) : (
-          <p className="text-[13px] text-core-text-muted">Not enabled</p>
-        )}
-      </div>
+      {/* Summary */}
+      <div className="w-full shrink-0 p-6 lg:w-[340px]">
+        <h2 className="mb-4 text-[16px] font-semibold text-core-text">Summary</h2>
 
-      <div>
-        <h3 className="mb-2 text-[14px] font-semibold text-core-text">Investments</h3>
-        <p className="text-[13px] text-core-text-muted">
-          {investments.mode === 'plan_default' ? 'Plan Default Investments' : 'Manual Investments'} ·{' '}
-          Auto Rebalance {investments.autoRebalance ? 'Enabled' : 'Disabled'}
+        <div className="mb-5 flex items-center gap-3 rounded-core-md bg-core-warning-bg p-3">
+          <span className="text-lg">📊</span>
+          <div>
+            <p className="text-[12px] text-core-text-muted">You are a</p>
+            <p className="text-[14px] font-semibold text-core-warning">Moderate Investor</p>
+          </div>
+        </div>
+
+        <p className="text-[12px] text-core-text-muted">Plan Details</p>
+        <p className="mb-1 text-[15px] font-semibold text-core-text">{PLAN.name}</p>
+        <p className="mb-4 text-[12px] text-core-text-muted">
+          Plan ID {PLAN.id} · Type 401(K)
         </p>
+
+        <div className="mb-4 border-t border-core-border pt-4">
+          <p className="mb-2 text-[13px] font-semibold text-core-text">Contribution Election</p>
+          <SummaryRow label="Pretax" value={`${contribution.pretax}%`} />
+          <SummaryRow label="AfterTax" value={`${contribution.afterTax}%`} />
+          <SummaryRow label="Roth" value={`${contribution.roth}%`} />
+        </div>
+
+        <div className="mb-4 border-t border-core-border pt-4">
+          <p className="mb-2 text-[13px] font-semibold text-core-text">Auto increase for your selected sources</p>
+          {autoIncrease.enabled ? (
+            <>
+              <SummaryRow label="Period of increase" value="Calendar year" />
+              <SummaryRow label="Pre Tax" value={`${autoIncrease.pretaxRate}% (Limit upto ${autoIncrease.limit}%)`} />
+              <SummaryRow label="After Tax" value={`${autoIncrease.afterTaxRate}% (Limit upto ${autoIncrease.limit}%)`} />
+            </>
+          ) : (
+            <p className="text-[13px] text-core-text-muted">Not enabled</p>
+          )}
+        </div>
+
+        <div className="border-t border-core-border pt-4">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-[13px] font-semibold text-core-text">Investments</p>
+            <a href="#breakdown" className="text-[12px] font-semibold text-core-info">
+              Breakdown
+            </a>
+          </div>
+          <SummaryRow
+            label="Auto Rebalance"
+            value={investments.autoRebalance ? 'Enabled' : 'Disabled'}
+            highlight={investments.autoRebalance}
+          />
+          <SummaryRow label="Pre-tax" value="100%" />
+          <SummaryRow label="After tax" value="100%" />
+        </div>
       </div>
+    </div>
+  )
+}
+
+function SummaryRow({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
+  return (
+    <div className="flex items-center justify-between py-1 text-[13px]">
+      <span className="text-core-text-muted">{label}</span>
+      <span className={`font-medium ${highlight ? 'text-core-success' : 'text-core-text'}`}>{value}</span>
     </div>
   )
 }

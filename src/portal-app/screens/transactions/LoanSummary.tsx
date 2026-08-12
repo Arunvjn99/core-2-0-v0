@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { AppShell } from '../../ui-kit/patterns/AppShell'
-import { IconChevronDown, IconDownload } from '../../ui-kit/icons'
+import { useNavigate } from 'react-router-dom'
+import { AppShell } from '../../../ui-kit/patterns/AppShell'
+import { IconChevronDown, IconDownload } from '../../../ui-kit/icons'
 
 /**
  * Figma: node 2893:27994 (part of the "Dashboard-not-enrolled" duplicate
@@ -20,7 +21,8 @@ const TABS = ['Repayment Schedule', 'Amortization Schedule', 'Payment details', 
 
 const money = (n: number) => `$${n.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
 
-export default function Transactions() {
+export default function LoanSummary() {
+  const navigate = useNavigate()
   const [tab, setTab] = useState<(typeof TABS)[number]>('Repayment Schedule')
   const paid = 5000
   const total = 6000
@@ -30,9 +32,9 @@ export default function Transactions() {
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div>
-            <a href="#back" className="text-[14px] font-semibold text-core-info">
+            <button onClick={() => navigate('/transactions')} className="text-[14px] font-semibold text-core-info">
               ‹ Back
-            </a>
+            </button>
             <h1 className="text-[22px] font-semibold text-core-text">Loan summary</h1>
           </div>
           <button className="flex items-center gap-2 rounded-[4px] border border-core-info px-4 py-2 text-[14px] font-semibold text-core-info">

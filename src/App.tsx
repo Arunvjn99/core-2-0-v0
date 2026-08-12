@@ -10,7 +10,9 @@ import Questionnaire from './portal-app/screens/enrollment/Questionnaire'
 import PlanEnrollment from './portal-app/screens/enrollment/PlanEnrollment'
 import Statements from './portal-app/screens/Statements'
 import Investments from './portal-app/screens/Investments'
-import Transactions from './portal-app/screens/Transactions'
+import TransactionsHub from './portal-app/screens/transactions/TransactionsHub'
+import LoanSummary from './portal-app/screens/transactions/LoanSummary'
+import NewTransferRequest from './portal-app/screens/transactions/NewTransferRequest'
 import Profile from './portal-app/screens/Profile'
 import AdminClients from './admin-app/screens/Clients'
 import AdminThemeEditor from './admin-app/screens/ThemeEditor'
@@ -37,7 +39,9 @@ function AnimatedRoutes() {
             <Route path="/enrollment" element={<Questionnaire />} />
             <Route path="/enroll" element={<PlanEnrollment />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/transactions" element={<Transactions />} />
+            <Route path="/transactions" element={<TransactionsHub />} />
+            <Route path="/transactions/loan" element={<LoanSummary />} />
+            <Route path="/transactions/new-transfer" element={<NewTransferRequest />} />
             <Route path="/statements" element={<Statements />} />
             <Route path="/investments" element={<Investments />} />
 

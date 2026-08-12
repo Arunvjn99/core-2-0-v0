@@ -39,6 +39,53 @@ A running record of what's been built, fixed, and decided in this project. Newes
 
 ---
 
+## Session: Profile rebuild, Transactions module, Review-step rebuild, AnimatePresence bug fix
+
+Full analysis pass (logged in `ANALYSIS.md`) found Profile and Transactions
+were far more built-out in Figma than what existed — this session closed
+most of that gap:
+
+- **Profile rebuilt as a tabbed screen** (`Profile.tsx` + new
+  `lib/profile.ts`): Personal Details (view + inline edit — avatar
+  initial, status badge, employer/employee ID, name/gender/DOB with
+  computed age), Employment (Payroll Frequency, Classification, Employer,
+  Employee ID, read-only), Beneficiaries (Figma's exact empty state, Add
+  form, list with Remove) — verified live by adding a real beneficiary
+  that persisted to `core2.participants`/beneficiaries
+- **Transactions restructured into its own module**
+  (`screens/transactions/`): `TransactionsHub.tsx` (filter chips, merged
+  demo + real `core2.transaction_requests` list, "+ New Request"),
+  `LoanSummary.tsx` (moved from the old single `Transactions.tsx`, fixed
+  nav), `NewTransferRequest.tsx` (new — Selected Investments sidebar,
+  Units/Amount/Percentage transfer-by tabs, per-source sell amounts,
+  real write to `core2.transaction_requests`, verified via direct
+  Supabase REST query against the submitted row)
+- **Plan Enrollment Review step rebuilt** to match Figma's actual
+  3-column layout (`2893:59711`): step tracker | Retirement Goal
+  Simulator (donut chart, "Optimize your score", Funding Plan Report
+  with Expected/All income/Shortfall) | Summary panel (risk pill, Plan
+  Details, full election summary). Previous version was a flat vertical
+  list — visually wrong.
+- **Fixed a real bug, not an environment artifact**: after the Review
+  rebuild, the wizard's step tracker would advance on "Next" but the
+  main content pane froze on the previous step indefinitely. Reproduced
+  consistently across dev-server restarts and fresh browser tabs/logins
+  (ruling out HMR staleness), and confirmed via scripted DOM checks that
+  `step` state was updating correctly but the rendered content wasn't.
+  Root cause: `framer-motion`'s `AnimatePresence` (`mode="wait"`, keyed
+  by `step`) never completed its exit/enter cycle after the first
+  transition in this React 19 setup. Fix: removed `AnimatePresence`/
+  `motion.div` for step content, replaced with a plain keyed `<div>` +
+  CSS `@keyframes` fade (`.core2-step-fade` in `index.css`). Verified
+  all 4 steps now render correctly on sequential clicks, fresh tab.
+- Full checklist and Figma node references logged in `ANALYSIS.md`.
+- Still open (carried forward, see `ANALYSIS.md`): Loans list screen,
+  Transfer Request Summary/tracking screen, Rollover Request wizard,
+  mobile slide-out menu pattern, Account statement balance-breakdown
+  view, Contribution Election step re-verification.
+
+---
+
 ## Session: Admin console
 
 Net-new (no Figma source) — built to match the participant portal's design system:
