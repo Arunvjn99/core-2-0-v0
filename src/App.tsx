@@ -6,7 +6,9 @@ import Login from './portal-app/screens/Login'
 import Dashboard from './portal-app/screens/Dashboard'
 import Questionnaire from './portal-app/screens/enrollment/Questionnaire'
 import Statements from './portal-app/screens/Statements'
-import ComingSoon from './portal-app/screens/ComingSoon'
+import Investments from './portal-app/screens/Investments'
+import Transactions from './portal-app/screens/Transactions'
+import Profile from './portal-app/screens/Profile'
 
 export default function App() {
   return (
@@ -19,10 +21,10 @@ export default function App() {
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/enrollment" element={<Questionnaire />} />
-              <Route path="/profile" element={<ComingSoon title="Profile" />} />
-              <Route path="/transactions" element={<ComingSoon title="Transactions" />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/transactions" element={<Transactions />} />
               <Route path="/statements" element={<Statements />} />
-              <Route path="/investments" element={<ComingSoon title="Investment Portfolio" />} />
+              <Route path="/investments" element={<Investments />} />
             </Route>
 
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
