@@ -4,6 +4,7 @@ import { AdminLayout } from './AdminLayout'
 import { Select } from '../../ui-kit/primitives/Select'
 import { Button } from '../../ui-kit/primitives/Button'
 import { fetchClients, fetchTheme, saveTheme, type Client, type ClientTheme } from '../lib/adminApi'
+import { useToast } from '../../ui-kit/lib/ToastContext'
 
 const EDITABLE_TOKENS: { key: string; label: string; fallback: string }[] = [
   { key: 'core-color-primary', label: 'Primary brand color', fallback: '#2f5d50' },
@@ -19,7 +20,7 @@ export default function ThemeEditor() {
   const [theme, setTheme] = useState<ClientTheme | null>(null)
   const [tokens, setTokens] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
-  const [savedAt, setSavedAt] = useState<Date | null>(null)
+  const { show } = useToast()
 
   useEffect(() => {
     fetchClients().then((list) => {
@@ -42,7 +43,7 @@ export default function ThemeEditor() {
     setSaving(true)
     try {
       await saveTheme(theme.id, tokens)
-      setSavedAt(new Date())
+      show('Theme saved — live for this client now')
     } finally {
       setSaving(false)
     }
@@ -99,7 +100,6 @@ export default function ThemeEditor() {
                 <Button variant="cta" onClick={handleSave} loading={saving}>
                   Save theme
                 </Button>
-                {savedAt && <span className="text-[13px] text-core-success">Saved at {savedAt.toLocaleTimeString()}</span>}
               </div>
             </div>
 

@@ -7,6 +7,7 @@ import { TextField } from '../../ui-kit/primitives/TextField'
 import { IconFileExport, IconReset, IconDownload } from '../../ui-kit/icons'
 import { useAuth } from '../lib/AuthContext'
 import { supabase } from '../../lib/supabaseClient'
+import { useToast } from '../../ui-kit/lib/ToastContext'
 import emptyFolder from '../../assets/statements/empty-folder.png'
 
 type DocumentRow = {
@@ -169,6 +170,7 @@ function GenerateStatementModal({
 }) {
   const [period, setPeriod] = useState('')
   const [downloading, setDownloading] = useState(false)
+  const { show } = useToast()
 
   async function handleDownload() {
     if (!period || !participantId) return
@@ -195,6 +197,7 @@ function GenerateStatementModal({
     URL.revokeObjectURL(url)
 
     setDownloading(false)
+    show('Statement downloaded')
     onGenerated()
     onClose()
   }

@@ -4,6 +4,7 @@ import { TextField } from '../../ui-kit/primitives/TextField'
 import { Button } from '../../ui-kit/primitives/Button'
 import { useAuth } from '../lib/AuthContext'
 import { supabase } from '../../lib/supabaseClient'
+import { useToast } from '../../ui-kit/lib/ToastContext'
 
 /**
  * Not present as a standalone screen in the Figma file (only referenced as
@@ -12,11 +13,11 @@ import { supabase } from '../../lib/supabaseClient'
  */
 export default function Profile() {
   const { session } = useAuth()
+  const { show } = useToast()
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [savedAt, setSavedAt] = useState<Date | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -45,9 +46,10 @@ export default function Profile() {
     setSaving(false)
     if (updateError) {
       setError(updateError.message)
+      show(updateError.message, 'error')
       return
     }
-    setSavedAt(new Date())
+    show('Profile saved')
   }
 
   return (
@@ -80,9 +82,6 @@ export default function Profile() {
           )}
 
           {error && <p className="text-[14px] text-core-critical">{error}</p>}
-          {savedAt && !error && (
-            <p className="text-[14px] text-core-success">Saved at {savedAt.toLocaleTimeString()}</p>
-          )}
 
           <div>
             <Button type="submit" variant="cta" loading={saving} disabled={loading}>

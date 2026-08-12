@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { AppShell } from '../../../ui-kit/patterns/AppShell'
 import { RiskGauge } from '../../../ui-kit/patterns/RiskGauge'
 import { Button } from '../../../ui-kit/primitives/Button'
 import { useAuth } from '../../lib/AuthContext'
+import { useToast } from '../../../ui-kit/lib/ToastContext'
 import {
   CONTRIBUTION_PRESETS,
   submitEnrollment,
@@ -33,8 +35,11 @@ const PLAN = { name: '401(K) Company Plan High Returns', id: '124542' }
 
 export default function PlanEnrollment() {
   const { session } = useAuth()
+  const { show } = useToast()
   const navigate = useNavigate()
+  const reduceMotion = useReducedMotion()
   const [stepIndex, setStepIndex] = useState(0)
+  const [direction, setDirection] = useState(1)
   const [contribution, setContribution] = useState<Contribution>({ mode: 'plan_default', ...CONTRIBUTION_PRESETS.plan_default })
   const [autoIncrease, setAutoIncrease] = useState<AutoIncrease>({ enabled: false, pretaxRate: 5, afterTaxRate: 5, limit: 15 })
   const [investments, setInvestments] = useState<EnrollmentInvestments>({ mode: 'plan_default', autoRebalance: true })
@@ -49,6 +54,7 @@ export default function PlanEnrollment() {
     setError(null)
     try {
       await submitEnrollment(session.user.id, { planName: PLAN.name, planId: PLAN.id, contribution, autoIncrease, investments })
+      show(`Enrolled in ${PLAN.name} 🎉`)
       navigate('/dashboard')
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not submit your enrollment — try again.')
@@ -73,7 +79,11 @@ export default function PlanEnrollment() {
               return (
                 <button
                   key={s}
-                  onClick={() => i <= stepIndex && setStepIndex(i)}
+                  onClick={() => {
+                    if (i > stepIndex) return
+                    setDirection(i > stepIndex ? 1 : -1)
+                    setStepIndex(i)
+                  }}
                   disabled={i > stepIndex}
                   className="flex items-start gap-3 py-3 text-left disabled:cursor-not-allowed"
                 >
@@ -102,17 +112,28 @@ export default function PlanEnrollment() {
           </div>
 
           {/* Step content */}
-          <div className="flex-1 p-6">
-            {step === 'Contribution Election' && (
-              <ContributionStep value={contribution} onChange={setContribution} />
-            )}
-            {step === 'Auto Increase' && <AutoIncreaseStep value={autoIncrease} onChange={setAutoIncrease} />}
-            {step === 'Investment Election' && (
-              <InvestmentStep value={investments} onChange={setInvestments} />
-            )}
-            {step === 'Review' && (
-              <ReviewStep contribution={contribution} autoIncrease={autoIncrease} investments={investments} />
-            )}
+          <div className="flex-1 overflow-hidden p-6">
+            <AnimatePresence mode="wait" custom={direction} initial={false}>
+              <motion.div
+                key={step}
+                custom={direction}
+                initial={reduceMotion ? undefined : { opacity: 0, x: direction * 24 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={reduceMotion ? undefined : { opacity: 0, x: direction * -24 }}
+                transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+              >
+                {step === 'Contribution Election' && (
+                  <ContributionStep value={contribution} onChange={setContribution} />
+                )}
+                {step === 'Auto Increase' && <AutoIncreaseStep value={autoIncrease} onChange={setAutoIncrease} />}
+                {step === 'Investment Election' && (
+                  <InvestmentStep value={investments} onChange={setInvestments} />
+                )}
+                {step === 'Review' && (
+                  <ReviewStep contribution={contribution} autoIncrease={autoIncrease} investments={investments} />
+                )}
+              </motion.div>
+            </AnimatePresence>
 
             {error && <p className="mt-4 text-[14px] text-core-critical">{error}</p>}
           </div>
@@ -123,7 +144,13 @@ export default function PlanEnrollment() {
             Cancel
           </Button>
           {stepIndex < STEPS.length - 1 ? (
-            <Button variant="cta" onClick={() => setStepIndex((i) => i + 1)}>
+            <Button
+              variant="cta"
+              onClick={() => {
+                setDirection(1)
+                setStepIndex((i) => i + 1)
+              }}
+            >
               Next
             </Button>
           ) : (

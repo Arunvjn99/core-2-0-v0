@@ -1,6 +1,8 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { AuthProvider } from './portal-app/lib/AuthContext'
 import { ThemeProvider } from './portal-app/lib/ThemeContext'
+import { ToastProvider } from './ui-kit/lib/ToastContext'
 import ProtectedRoute from './portal-app/lib/ProtectedRoute'
 import Login from './portal-app/screens/Login'
 import Dashboard from './portal-app/screens/Dashboard'
@@ -14,33 +16,54 @@ import AdminClients from './admin-app/screens/Clients'
 import AdminThemeEditor from './admin-app/screens/ThemeEditor'
 import AdminModuleToggles from './admin-app/screens/ModuleToggles'
 
+function AnimatedRoutes() {
+  const location = useLocation()
+  const reduce = useReducedMotion()
+
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={location.pathname}
+        initial={reduce ? undefined : { opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={reduce ? undefined : { opacity: 0, y: -8 }}
+        transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
+      >
+        <Routes location={location}>
+          <Route path="/login" element={<Login />} />
+
+          <Route element={<ProtectedRoute />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/enrollment" element={<Questionnaire />} />
+            <Route path="/enroll" element={<PlanEnrollment />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/transactions" element={<Transactions />} />
+            <Route path="/statements" element={<Statements />} />
+            <Route path="/investments" element={<Investments />} />
+
+            <Route path="/admin/clients" element={<AdminClients />} />
+            <Route path="/admin/theme" element={<AdminThemeEditor />} />
+            <Route path="/admin/modules" element={<AdminModuleToggles />} />
+            <Route path="/admin" element={<Navigate to="/admin/clients" replace />} />
+          </Route>
+
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </motion.div>
+    </AnimatePresence>
+  )
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <ThemeProvider>
-        <AuthProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-
-            <Route element={<ProtectedRoute />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/enrollment" element={<Questionnaire />} />
-              <Route path="/enroll" element={<PlanEnrollment />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/transactions" element={<Transactions />} />
-              <Route path="/statements" element={<Statements />} />
-              <Route path="/investments" element={<Investments />} />
-
-              <Route path="/admin/clients" element={<AdminClients />} />
-              <Route path="/admin/theme" element={<AdminThemeEditor />} />
-              <Route path="/admin/modules" element={<AdminModuleToggles />} />
-              <Route path="/admin" element={<Navigate to="/admin/clients" replace />} />
-            </Route>
-
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
-        </AuthProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <AnimatedRoutes />
+          </AuthProvider>
+        </ToastProvider>
       </ThemeProvider>
     </BrowserRouter>
   )

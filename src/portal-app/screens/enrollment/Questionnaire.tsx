@@ -60,7 +60,11 @@ export default function Questionnaire() {
         level,
         computed_at: new Date().toISOString(),
       })
-      navigate('/dashboard')
+      // Figma treats the risk questionnaire and plan enrollment as one
+      // continuous flow (same left-panel "Quick Setup" chrome carries into
+      // Contribution Election) — chain straight into it instead of
+      // dropping back to the dashboard.
+      navigate('/enroll')
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not save your answers — try again.')
     } finally {

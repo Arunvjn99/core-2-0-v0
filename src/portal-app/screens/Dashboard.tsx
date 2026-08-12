@@ -18,8 +18,19 @@ import learningIllustration from '../../assets/dashboard/learning-illustration.p
  * live query keyed to the participant's client_id.
  */
 const DEMO_PLANS: Plan[] = [
-  { id: 'p1', name: '401(K) Save More', planId: '124542', type: '401(K)', eligible: false },
-  { id: 'p2', name: '401(K) Save More', planId: '124542', type: '401(K)', eligible: false },
+  // The Figma reference shows both as INELIGIBLE (a not-yet-qualified
+  // participant), but that leaves the Enroll button permanently disabled
+  // with no path forward — a dead end. Demo data needs at least one
+  // reachable happy path, so the primary plan is eligible.
+  { id: 'p1', name: '401(K) Save More', planId: '124542', type: '401(K)', eligible: true },
+  {
+    id: 'p2',
+    name: '401(K) Save More',
+    planId: '124542',
+    type: '401(K)',
+    eligible: false,
+    ineligibleReason: 'Requires 90 days of employment',
+  },
 ]
 
 export default function Dashboard() {

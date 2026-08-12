@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion'
 import { IconChevronRight, IconInfo } from '../icons'
 
 export type Plan = {
@@ -11,7 +12,11 @@ export type Plan = {
 
 export function PlanCard({ plan, onEnroll }: { plan: Plan; onEnroll: (plan: Plan) => void }) {
   return (
-    <div className="flex w-full flex-col items-start justify-between gap-4 rounded-core-md bg-core-surface p-6 shadow-[0_1px_2px_rgba(0,0,0,0.34)] sm:flex-row sm:items-center sm:gap-6">
+    <motion.div
+      whileHover={{ y: -2, boxShadow: '0 8px 20px rgba(0,0,0,0.12)' }}
+      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+      className="flex w-full flex-col items-start justify-between gap-4 rounded-core-md bg-core-surface p-6 shadow-[0_1px_2px_rgba(0,0,0,0.34)] sm:flex-row sm:items-center sm:gap-6"
+    >
       <div className="flex flex-col items-start gap-2">
         {!plan.eligible && (
           <span className="rounded-full bg-core-critical px-2 py-1 text-[12px] font-semibold text-white">
@@ -31,7 +36,9 @@ export function PlanCard({ plan, onEnroll }: { plan: Plan; onEnroll: (plan: Plan
           </div>
         )}
       </div>
-      <button
+      <motion.button
+        whileHover={plan.eligible ? { scale: 1.03 } : undefined}
+        whileTap={plan.eligible ? { scale: 0.97 } : undefined}
         onClick={() => onEnroll(plan)}
         disabled={!plan.eligible}
         className="flex w-full shrink-0 items-center justify-center gap-2 rounded-core-sm px-3 py-2.5 text-[16px] font-semibold text-white disabled:cursor-not-allowed disabled:border disabled:border-core-border-strong disabled:bg-core-surface-sunken disabled:text-core-text-muted sm:w-auto"
@@ -42,7 +49,7 @@ export function PlanCard({ plan, onEnroll }: { plan: Plan; onEnroll: (plan: Plan
         }
       >
         Enroll <IconChevronRight className="size-3.5" />
-      </button>
-    </div>
+      </motion.button>
+    </motion.div>
   )
 }
