@@ -5,6 +5,7 @@ import ProtectedRoute from './portal-app/lib/ProtectedRoute'
 import Login from './portal-app/screens/Login'
 import Dashboard from './portal-app/screens/Dashboard'
 import Questionnaire from './portal-app/screens/enrollment/Questionnaire'
+import PlanEnrollment from './portal-app/screens/enrollment/PlanEnrollment'
 import Statements from './portal-app/screens/Statements'
 import Investments from './portal-app/screens/Investments'
 import Transactions from './portal-app/screens/Transactions'
@@ -21,6 +22,7 @@ export default function App() {
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/enrollment" element={<Questionnaire />} />
+              <Route path="/enroll" element={<PlanEnrollment />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/transactions" element={<Transactions />} />
               <Route path="/statements" element={<Statements />} />
