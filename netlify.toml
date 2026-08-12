@@ -1,0 +1,11 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# SPA fallback — this is a client-side-routed React app (react-router).
+# Without this, refreshing or deep-linking to e.g. /dashboard 404s because
+# Netlify looks for a literal /dashboard/index.html on disk.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
