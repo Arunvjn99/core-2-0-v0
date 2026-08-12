@@ -7,8 +7,12 @@ type SelectProps = SelectHTMLAttributes<HTMLSelectElement> & {
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, placeholder = 'Select', id, className = '', children, ...rest }, ref) => {
+  ({ label, placeholder = 'Select', id, className = '', children, value, ...rest }, ref) => {
     const selectId = id ?? label.toLowerCase().replace(/\s+/g, '-')
+    // Only fall back to defaultValue when this is genuinely uncontrolled —
+    // passing both value and defaultValue to the same <select> put it in a
+    // controlled/uncontrolled tug-of-war that caused a render loop.
+    const controlledProps = value !== undefined ? { value } : { defaultValue: '' }
     return (
       <div className="flex w-full flex-col gap-2">
         <label htmlFor={selectId} className="text-[15px] font-medium text-core-text">
@@ -18,7 +22,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           <select
             ref={ref}
             id={selectId}
-            defaultValue=""
+            {...controlledProps}
             className={`w-full appearance-none rounded-[4px] border border-core-border-strong bg-core-surface-raised px-3 py-[11px] text-[15px] text-core-text outline-none focus:border-core-info ${className}`}
             {...rest}
           >

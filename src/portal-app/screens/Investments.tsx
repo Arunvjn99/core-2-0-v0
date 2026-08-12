@@ -1,7 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AppShell } from '../../ui-kit/patterns/AppShell'
 import { Button } from '../../ui-kit/primitives/Button'
+import { SlideOver } from '../../ui-kit/primitives/SlideOver'
+import { Select } from '../../ui-kit/primitives/Select'
+import { TextField } from '../../ui-kit/primitives/TextField'
 import { useAuth } from '../lib/AuthContext'
 import {
   RECOMMENDED_FUNDS,
@@ -14,6 +17,11 @@ import {
 /**
  * Figma: "Investments" (node 2893:64916 Plan Default, 2893:66484 Manual
  * Investments — same shell, different right-panel content per mode).
+ *
+ * The Manual Investments fund picker is a right-edge slide-in overlay in
+ * the actual Figma prototype (confirmed by playing it), not an in-place
+ * panel swap — the first pass of this build got that wrong. Fixed below
+ * with the SlideOver primitive.
  */
 const MODES: { id: InvestmentMode; title: string; body: string }[] = [
   { id: 'advisor', title: 'Manage Investments', body: 'An advisor helps you choose how much to save and where to invest.' },
@@ -29,6 +37,7 @@ export default function Investments() {
   const [selectedFunds, setSelectedFunds] = useState<Fund[]>(RECOMMENDED_FUNDS)
   const [saving, setSaving] = useState(false)
   const [loaded, setLoaded] = useState(false)
+  const [pickerOpen, setPickerOpen] = useState(false)
 
   useEffect(() => {
     if (!session) return
@@ -122,6 +131,16 @@ export default function Investments() {
                   <h2 className="text-[16px] font-semibold text-core-text">
                     {mode === 'plan_default' ? 'Recommended Investments' : 'Choose Investments'}
                   </h2>
+                  {mode === 'manual' && (
+                    <div className="flex items-center gap-3">
+                      <span className="rounded-full bg-core-info/10 px-2.5 py-1 text-[12px] font-semibold text-core-info">
+                        {selectedFunds.length} Selected
+                      </span>
+                      <Button variant="cta" onClick={() => setPickerOpen(true)}>
+                        Manage Investment
+                      </Button>
+                    </div>
+                  )}
                 </div>
                 <label className="mb-4 flex items-center gap-2 text-[14px] font-semibold text-core-text-subtle">
                   Auto Rebalance
@@ -148,36 +167,27 @@ export default function Investments() {
                         <th className="px-4 py-3 font-semibold">Investment names</th>
                         <th className="px-4 py-3 font-semibold">Fund Type</th>
                         <th className="px-4 py-3 text-right font-semibold">Allocation</th>
-                        {mode === 'manual' && <th className="px-4 py-3" />}
                       </tr>
                     </thead>
                     <tbody>
-                      {RECOMMENDED_FUNDS.map((fund) => {
-                        const checked = selectedFunds.some((f) => f.name === fund.name)
-                        return (
-                          <tr key={fund.name} className="border-b border-core-border last:border-0">
-                            <td className="px-4 py-3">
-                              <a href="#fund-detail" className="font-medium text-core-info underline">
-                                {fund.name}
-                              </a>
-                            </td>
-                            <td className="px-4 py-3 text-core-text-muted">{fund.type}</td>
-                            <td className="px-4 py-3 text-right text-core-text-subtle">
-                              {mode === 'manual' && !checked ? '—' : `${fund.allocation}%`}
-                            </td>
-                            {mode === 'manual' && (
-                              <td className="px-4 py-3 text-right">
-                                <input
-                                  type="checkbox"
-                                  checked={checked}
-                                  onChange={() => toggleFund(fund)}
-                                  className="size-4 accent-[var(--core-color-info)]"
-                                />
-                              </td>
-                            )}
-                          </tr>
-                        )
-                      })}
+                      {(mode === 'manual' ? selectedFunds : RECOMMENDED_FUNDS).map((fund) => (
+                        <tr key={fund.name} className="border-b border-core-border last:border-0">
+                          <td className="px-4 py-3">
+                            <a href="#fund-detail" className="font-medium text-core-info underline">
+                              {fund.name}
+                            </a>
+                          </td>
+                          <td className="px-4 py-3 text-core-text-muted">{fund.type}</td>
+                          <td className="px-4 py-3 text-right text-core-text-subtle">{fund.allocation}%</td>
+                        </tr>
+                      ))}
+                      {mode === 'manual' && selectedFunds.length === 0 && (
+                        <tr>
+                          <td colSpan={3} className="px-4 py-8 text-center text-core-text-muted">
+                            No investments selected — click "Manage Investment" to add some.
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -195,6 +205,84 @@ export default function Investments() {
           </Button>
         </div>
       </div>
+
+      <FundPicker
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        selectedFunds={selectedFunds}
+        onToggle={toggleFund}
+      />
     </AppShell>
+  )
+}
+
+function FundPicker({
+  open,
+  onClose,
+  selectedFunds,
+  onToggle,
+}: {
+  open: boolean
+  onClose: () => void
+  selectedFunds: Fund[]
+  onToggle: (fund: Fund) => void
+}) {
+  const [search, setSearch] = useState('')
+  const [fundType, setFundType] = useState('')
+
+  const filtered = useMemo(
+    () =>
+      RECOMMENDED_FUNDS.filter(
+        (f) =>
+          f.name.toLowerCase().includes(search.toLowerCase()) && (fundType === '' || f.type === fundType),
+      ),
+    [search, fundType],
+  )
+
+  return (
+    <SlideOver open={open} title="Investments" onClose={onClose} width={520}>
+      <div className="flex flex-col gap-4">
+        <p className="text-[13px] font-semibold text-core-info">{selectedFunds.length} Fund types Selected</p>
+        <div className="flex gap-3">
+          <TextField label="Search" placeholder="Search investment name, CUSIP" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <div className="w-40 shrink-0">
+            <Select label="Fund Type" value={fundType} onChange={(e) => setFundType(e.target.value)}>
+              <option value="">All</option>
+              <option value="Large Cap">Large Cap</option>
+              <option value="Mid Cap">Mid Cap</option>
+              <option value="Small Cap">Small Cap</option>
+              <option value="Bond">Bond</option>
+            </Select>
+          </div>
+        </div>
+
+        <div className="flex flex-col divide-y divide-core-border rounded-core-md border border-core-border">
+          {filtered.map((fund) => {
+            const checked = selectedFunds.some((f) => f.name === fund.name)
+            return (
+              <label key={fund.name} className="flex cursor-pointer items-center gap-3 p-4">
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={() => onToggle(fund)}
+                  className="size-4 shrink-0 accent-[var(--core-color-info)]"
+                />
+                <div>
+                  <p className="text-[14px] font-medium text-core-text">{fund.name}</p>
+                  <p className="text-[12px] text-core-text-muted">{fund.type} · CUSIP 12345</p>
+                </div>
+              </label>
+            )
+          })}
+          {filtered.length === 0 && (
+            <p className="p-6 text-center text-[13px] text-core-text-muted">No funds match your search.</p>
+          )}
+        </div>
+
+        <Button variant="cta" onClick={onClose} className="w-fit self-end">
+          Done
+        </Button>
+      </div>
+    </SlideOver>
   )
 }
