@@ -4,6 +4,7 @@ import { useAuth } from '../lib/AuthContext'
 import { TextField } from '../../ui-kit/primitives/TextField'
 import { Button } from '../../ui-kit/primitives/Button'
 import { IconEye, IconEyeOff } from '../../ui-kit/icons'
+import { ThemeToggle } from '../../ui-kit/primitives/ThemeToggle'
 import hero from '../../assets/login/hero.png'
 import logo from '../../assets/login/logo.svg'
 import wordmark from '../../assets/login/wordmark.svg'
@@ -40,7 +41,8 @@ export default function Login() {
   }
 
   return (
-    <div className="flex min-h-svh w-full bg-core-surface">
+    <div className="relative flex h-svh w-full overflow-y-auto bg-core-surface lg:overflow-hidden">
+      <ThemeToggle className="fixed right-4 top-4 z-10 bg-core-surface shadow-core-sm" />
       {/* Brand panel */}
       <div className="hidden w-[638px] shrink-0 items-center justify-center p-[82px] lg:flex">
         <div className="relative flex h-[855px] w-full max-w-[474px] flex-col items-center justify-between overflow-hidden rounded-[17px] px-12 pb-11 pt-14 text-white">
@@ -71,11 +73,15 @@ export default function Login() {
       </div>
 
       {/* Form panel */}
-      <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 shadow-[0_1px_10px_rgba(0,0,0,0.05),0_4px_5px_rgba(0,0,0,0.08),0_2px_4px_-1px_rgba(0,0,0,0.12)] sm:px-16">
+      <div className="flex min-h-full flex-1 flex-col items-center justify-center overflow-y-auto px-6 py-12 shadow-[0_1px_10px_rgba(0,0,0,0.05),0_4px_5px_rgba(0,0,0,0.08),0_2px_4px_-1px_rgba(0,0,0,0.12)] sm:px-16">
         <form onSubmit={handleSubmit} className="flex w-full max-w-[499px] flex-col items-end gap-16">
           <div className="flex w-full flex-col gap-6">
             <div className="flex w-full flex-col items-start gap-[124px]">
-              <img src={logo} alt="" className="h-[45px]" />
+              <img
+                src={logo}
+                alt=""
+                className="h-[45px] rounded-lg bg-white px-2 py-1"
+              />
               <h1 className="text-[31px] font-bold text-core-text">Login</h1>
             </div>
 
@@ -123,20 +129,20 @@ export default function Login() {
                 />
                 Keep me signed in
               </label>
-              <a href="#forgot-password" className="text-[16px] font-semibold text-[#01607f]">
+              <a href="#forgot-password" className="text-[16px] font-semibold text-core-info">
                 Forgot Password?
               </a>
             </div>
           </div>
 
-          <Button type="submit" loading={loading} className="w-full !rounded-[4px] !py-[15px]">
+          <Button type="submit" variant="cta" loading={loading} className="w-full !rounded-[4px] !py-[15px]">
             Login
           </Button>
         </form>
 
         <p className="mt-8 w-full max-w-[499px] text-[14px] text-core-text">
           Any Questions? Visit{' '}
-          <a href="#help-center" className="font-semibold text-[#01607f] underline">
+          <a href="#help-center" className="font-semibold text-core-info underline">
             Help Center
           </a>
         </p>

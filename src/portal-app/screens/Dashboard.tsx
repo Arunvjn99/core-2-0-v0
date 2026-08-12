@@ -53,10 +53,10 @@ export default function Dashboard() {
 
   return (
     <AppShell>
-      <div className="flex gap-6">
+      <div className="flex flex-col gap-6 lg:flex-row">
         <div className="flex flex-1 flex-col gap-4">
           <div
-            className="flex items-center rounded-core-md bg-white p-8 shadow-[0_1px_1px_rgba(0,0,0,0.25)]"
+            className="flex items-center rounded-core-md bg-core-surface p-6 shadow-[0_1px_1px_rgba(0,0,0,0.25)] sm:p-8"
             style={{
               backgroundImage:
                 'radial-gradient(circle at 0 0, rgba(103,252,189,0.2), rgba(69,238,249,0) 90%)',
@@ -83,7 +83,7 @@ export default function Dashboard() {
                   className="relative h-[26px] w-[48px] rounded-full transition-colors"
                   style={{
                     backgroundImage: showIneligible
-                      ? 'linear-gradient(90deg, #05cded 14.6%, #01afe6 107.38%)'
+                      ? 'linear-gradient(90deg, var(--core-color-cta-from) 14.6%, var(--core-color-cta-to) 107.38%)'
                       : undefined,
                     backgroundColor: showIneligible ? undefined : '#c0c1c4',
                   }}
@@ -97,7 +97,7 @@ export default function Dashboard() {
               </label>
             </div>
 
-            <div className="flex gap-4">
+            <div className="flex flex-col gap-4 md:flex-row">
               <div className="flex flex-1 flex-col gap-4">
                 {visiblePlans.map((plan) => (
                   <PlanCard key={plan.id} plan={plan} onEnroll={() => navigate('/enrollment')} />
@@ -109,9 +109,9 @@ export default function Dashboard() {
                 )}
               </div>
 
-              <div className="w-[238px] shrink-0 rounded-core-md bg-core-surface p-3.5 shadow-[0_1px_1.5px_rgba(0,0,0,0.25)]">
+              <div className="w-full shrink-0 rounded-core-md bg-core-surface p-3.5 shadow-[0_1px_1.5px_rgba(0,0,0,0.25)] md:w-[238px]">
                 <div className="flex flex-col items-start gap-3">
-                  <div className="flex w-full items-center justify-center rounded-core-sm bg-[#f1fbff] px-10 py-4">
+                  <div className="flex w-full items-center justify-center rounded-core-sm bg-core-info/10 px-10 py-4">
                     <img src={learningIllustration} alt="" className="h-[118px] w-32 object-cover" />
                   </div>
                   <span className="flex items-center gap-1 rounded-full bg-core-primary/10 px-2 py-1 text-[12px] font-medium text-core-primary">
@@ -123,7 +123,7 @@ export default function Dashboard() {
                       Learn about planning, saving, investing wisely
                     </p>
                   </div>
-                  <button className="rounded-[6px] border border-[#01607f] bg-[#01607f] px-3.5 py-1 text-[12px] font-medium text-white shadow-[0_1px_2px_rgba(16,24,40,0.05)]">
+                  <button className="rounded-[6px] border border-core-info bg-core-info px-3.5 py-1 text-[12px] font-medium text-core-info-contrast shadow-[0_1px_2px_rgba(16,24,40,0.05)]">
                     Know More
                   </button>
                 </div>
@@ -132,12 +132,12 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="w-[280px] shrink-0 rounded-core-md bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.25)]">
+        <div className="w-full shrink-0 rounded-core-md bg-core-surface p-4 shadow-[0_1px_3px_rgba(0,0,0,0.25)] lg:w-[280px]">
           <div className="flex flex-col items-center gap-4">
             <div className="flex w-full items-center justify-between">
               <p className="text-[18px] font-semibold text-core-text">Risk Level</p>
               {riskProfile && (
-                <span className="rounded-full bg-[#fdf4e8] px-2 py-1 text-[14px] font-semibold text-[#a58511]">
+                <span className="rounded-full bg-core-warning-bg px-2 py-1 text-[14px] font-semibold text-core-warning">
                   {riskProfile.level} Investor
                 </span>
               )}
@@ -158,7 +158,7 @@ export default function Dashboard() {
                 <button
                   onClick={() => navigate('/enrollment')}
                   className="flex items-center gap-2 rounded-core-sm px-3 py-2 text-[12px] font-medium text-white"
-                  style={{ backgroundImage: 'linear-gradient(90deg, #05cded 14.6%, #01afe6 107.38%)' }}
+                  style={{ backgroundImage: 'linear-gradient(90deg, var(--core-color-cta-from) 14.6%, var(--core-color-cta-to) 107.38%)' }}
                 >
                   <IconSparkles className="size-4" />
                   Edit Preferences
@@ -172,7 +172,7 @@ export default function Dashboard() {
                 <button
                   onClick={() => navigate('/enrollment')}
                   className="flex items-center gap-2 rounded-core-sm px-3 py-2 text-[12px] font-medium text-white"
-                  style={{ backgroundImage: 'linear-gradient(90deg, #05cded 14.6%, #01afe6 107.38%)' }}
+                  style={{ backgroundImage: 'linear-gradient(90deg, var(--core-color-cta-from) 14.6%, var(--core-color-cta-to) 107.38%)' }}
                 >
                   <IconSparkles className="size-4" />
                   Take Questionnaire

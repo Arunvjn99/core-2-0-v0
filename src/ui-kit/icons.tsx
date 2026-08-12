@@ -18,6 +18,11 @@ import {
   faCircleInfo,
   faEye,
   faEyeSlash,
+  faSun,
+  faMoon,
+  faDesktop,
+  faBars,
+  faXmark,
 } from '@fortawesome/free-solid-svg-icons'
 
 type IconProps = { className?: string }
@@ -41,3 +46,8 @@ export const IconSparkles = wrap(faWandMagicSparkles)
 export const IconInfo = wrap(faCircleInfo)
 export const IconEye = wrap(faEye)
 export const IconEyeOff = wrap(faEyeSlash)
+export const IconSun = wrap(faSun)
+export const IconMoon = wrap(faMoon)
+export const IconDesktop = wrap(faDesktop)
+export const IconMenu = wrap(faBars)
+export const IconClose = wrap(faXmark)

@@ -11,10 +11,10 @@ export type Plan = {
 
 export function PlanCard({ plan, onEnroll }: { plan: Plan; onEnroll: (plan: Plan) => void }) {
   return (
-    <div className="flex w-full items-center justify-between gap-6 rounded-core-md bg-core-surface p-6 shadow-[0_1px_2px_rgba(0,0,0,0.34)]">
+    <div className="flex w-full flex-col items-start justify-between gap-4 rounded-core-md bg-core-surface p-6 shadow-[0_1px_2px_rgba(0,0,0,0.34)] sm:flex-row sm:items-center sm:gap-6">
       <div className="flex flex-col items-start gap-2">
         {!plan.eligible && (
-          <span className="rounded-full bg-[#9c2227] px-2 py-1 text-[12px] font-semibold text-white">
+          <span className="rounded-full bg-core-critical px-2 py-1 text-[12px] font-semibold text-white">
             INELIGIBLE
           </span>
         )}
@@ -25,7 +25,7 @@ export function PlanCard({ plan, onEnroll }: { plan: Plan; onEnroll: (plan: Plan
           <span>Type {plan.type}</span>
         </div>
         {!plan.eligible && (
-          <div className="flex items-center gap-1 text-[12px] font-medium text-core-text/80">
+          <div className="flex items-center gap-1 text-[12px] font-medium text-core-text-subtle">
             <IconInfo className="size-3.5" />
             {plan.ineligibleReason ?? "See what's required to enroll"}
           </div>
@@ -34,10 +34,10 @@ export function PlanCard({ plan, onEnroll }: { plan: Plan; onEnroll: (plan: Plan
       <button
         onClick={() => onEnroll(plan)}
         disabled={!plan.eligible}
-        className="flex shrink-0 items-center gap-2 rounded-core-sm px-3 py-2.5 text-[16px] font-semibold text-white disabled:cursor-not-allowed disabled:bg-[#e7e8ec] disabled:text-[#b9bbc6] disabled:border disabled:border-[#c0c1c4]"
+        className="flex w-full shrink-0 items-center justify-center gap-2 rounded-core-sm px-3 py-2.5 text-[16px] font-semibold text-white disabled:cursor-not-allowed disabled:border disabled:border-core-border-strong disabled:bg-core-surface-sunken disabled:text-core-text-muted sm:w-auto"
         style={
           plan.eligible
-            ? { backgroundImage: 'linear-gradient(90deg, #05cded 14.6%, #01afe6 107.38%)' }
+            ? { backgroundImage: 'linear-gradient(90deg, var(--core-color-cta-from) 14.6%, var(--core-color-cta-to) 107.38%)' }
             : undefined
         }
       >

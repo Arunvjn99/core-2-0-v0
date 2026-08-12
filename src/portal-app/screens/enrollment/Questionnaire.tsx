@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../lib/AuthContext'
+import { ThemeToggle } from '../../../ui-kit/primitives/ThemeToggle'
 import {
   LIKERT_OPTIONS,
   RISK_QUESTIONS,
@@ -68,7 +69,8 @@ export default function Questionnaire() {
   }
 
   return (
-    <div className="flex min-h-svh w-full bg-core-surface">
+    <div className="relative flex min-h-svh w-full flex-col bg-core-surface lg:flex-row">
+      <ThemeToggle className="fixed right-4 top-4 z-10 bg-core-surface shadow-core-sm" />
       <aside
         className="hidden w-[592px] shrink-0 items-center justify-center p-[65px] lg:flex"
         style={{
@@ -91,7 +93,7 @@ export default function Questionnaire() {
           <div className="flex w-full max-w-[296px] flex-col gap-4">
             <div className="flex items-center gap-3 rounded-[4px] bg-core-surface p-4 shadow-lg -rotate-[2.7deg]">
               <StatBadge value="100%" label="EXCELLENT" />
-              <p className="text-[12px] font-medium text-[#292929]">Retirement Readiness Score</p>
+              <p className="text-[12px] font-medium text-core-text">Retirement Readiness Score</p>
             </div>
             <div className="flex items-center gap-4 rounded-[5px] bg-white p-4 shadow-xl rotate-[1.2deg]">
               <StatBadge value="" label="LOW RISK" />
@@ -99,7 +101,7 @@ export default function Questionnaire() {
             </div>
             <div className="flex items-center gap-3 rounded-[4px] bg-core-surface p-4 shadow-lg -rotate-[4.3deg]">
               <StatBadge value="" label="LOW" />
-              <p className="text-[12px] font-medium text-[#292929]">Your Retirement Funding Gap</p>
+              <p className="text-[12px] font-medium text-core-text">Your Retirement Funding Gap</p>
             </div>
           </div>
         </div>
@@ -122,8 +124,8 @@ export default function Questionnaire() {
                     className="h-1 flex-1 rounded-full"
                     style={
                       i < step
-                        ? { backgroundImage: 'linear-gradient(90deg, #05cded 14.6%, #01afe6 107.38%)' }
-                        : { backgroundColor: '#d9d9d9' }
+                        ? { backgroundImage: 'linear-gradient(90deg, var(--core-color-cta-from) 14.6%, var(--core-color-cta-to) 107.38%)' }
+                        : { backgroundColor: 'var(--core-color-border-strong)' }
                     }
                   />
                 ))}
@@ -147,7 +149,7 @@ export default function Questionnaire() {
               {step > 1 ? (
                 <button
                   onClick={() => setStep((s) => s - 1)}
-                  className="text-[16px] font-semibold text-[#01607f]"
+                  className="text-[16px] font-semibold text-core-info"
                 >
                   ‹ Previous
                 </button>
@@ -159,7 +161,7 @@ export default function Questionnaire() {
                   disabled={!canAdvance}
                   onClick={() => setStep((s) => s + 1)}
                   className="rounded-core-sm px-5 py-2.5 text-[16px] font-semibold text-white disabled:opacity-40"
-                  style={{ backgroundImage: 'linear-gradient(90deg, #05cded 14.6%, #01afe6 107.38%)' }}
+                  style={{ backgroundImage: 'linear-gradient(90deg, var(--core-color-cta-from) 14.6%, var(--core-color-cta-to) 107.38%)' }}
                 >
                   Next
                 </button>
@@ -168,7 +170,7 @@ export default function Questionnaire() {
                   disabled={saving}
                   onClick={handleSubmit}
                   className="rounded-core-sm px-5 py-2.5 text-[16px] font-semibold text-white disabled:opacity-60"
-                  style={{ backgroundImage: 'linear-gradient(90deg, #05cded 14.6%, #01afe6 107.38%)' }}
+                  style={{ backgroundImage: 'linear-gradient(90deg, var(--core-color-cta-from) 14.6%, var(--core-color-cta-to) 107.38%)' }}
                 >
                   {saving ? 'Saving…' : 'Submit'}
                 </button>
@@ -184,7 +186,7 @@ export default function Questionnaire() {
 function StatBadge({ value, label }: { value: string; label: string }) {
   return (
     <div className="flex shrink-0 flex-col items-center gap-1">
-      {value && <p className="text-[18px] font-bold text-[#292929]">{value}</p>}
+      {value && <p className="text-[18px] font-bold text-core-text">{value}</p>}
       <p className="rounded-full bg-[#e7f6ea] px-1.5 py-0.5 text-[9px] font-bold text-[#105f27]">{label}</p>
     </div>
   )
@@ -212,7 +214,7 @@ function LikertStep({
           <label
             key={opt}
             className={`flex cursor-pointer items-center gap-3 rounded-[5px] border px-3 py-4 transition-colors ${
-              value === opt ? 'border-core-info bg-core-info/5' : 'border-[#d6d6d6] bg-white'
+              value === opt ? 'border-core-info bg-core-info/5' : 'border-core-border bg-core-surface'
             }`}
           >
             <input
@@ -220,13 +222,13 @@ function LikertStep({
               name={`question-${step}`}
               checked={value === opt}
               onChange={() => onChange(opt)}
-              className="size-[18px] appearance-none rounded-full border-2 border-[#c0c1c4] bg-white bg-clip-content p-[3px] checked:border-[var(--core-color-info)] checked:bg-[var(--core-color-info)]"
+              className="size-[18px] shrink-0 appearance-none rounded-full border-2 border-core-border-strong bg-core-surface bg-clip-content p-[3px] checked:border-[var(--core-color-info)] checked:bg-[var(--core-color-info)]"
             />
-            <span className="text-[14px] font-medium text-[#292929]">{opt}</span>
+            <span className="text-[14px] font-medium text-core-text">{opt}</span>
           </label>
         ))}
       </div>
-      <p className="rounded-b-lg bg-[#e6f7fd] px-6 py-4 text-[14px] font-semibold text-[#01607f]">
+      <p className="rounded-b-lg bg-core-info/10 px-6 py-4 text-[14px] font-semibold text-core-info">
         This question directly influences how we set up your investment style.
       </p>
     </fieldset>
@@ -283,7 +285,7 @@ function FundingStep({
 
 function FundingRow({ icon, label, children }: { icon: string; label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-3 rounded-[8px] bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.06)]">
+    <div className="flex items-start gap-3 rounded-[8px] bg-core-surface p-4 shadow-[0_1px_2px_rgba(0,0,0,0.06)]">
       <span className="flex size-9 shrink-0 items-center justify-center rounded-[8px] bg-core-info/10 text-lg">
         {icon}
       </span>

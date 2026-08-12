@@ -5,27 +5,44 @@
  * on :root (see src/lib/theme.ts). Never hardcode colors/fonts in components;
  * always reference these variables (or the Tailwind theme() aliases below).
  *
- * NOTE: placeholder values below — to be replaced once canonical Figma
- * screens are extracted (see task "Build design token set").
+ * Dark/light mode: src/portal-app/lib/ThemeContext.tsx stamps
+ * data-theme="dark"|"light" on <html>, which overrides the OS-level
+ * prefers-color-scheme media query in both directions (see design doc).
  */
 :root {
   /* --- Color: brand (overridden per client) --- */
   --core-color-primary: #2f5d50;
   --core-color-primary-contrast: #ffffff;
   --core-color-secondary: #a8641c;
+  --core-color-info: #2563a8;
+  --core-color-info-contrast: #ffffff;
+  /* CTA gradient used across the participant portal's primary actions
+     (Login, Enroll, Submit, Edit Preferences) — distinct from
+     --core-color-primary, which is the reserved white-label brand slot. */
+  --core-color-cta-from: #05cded;
+  --core-color-cta-to: #01afe6;
 
-  /* --- Color: surface / text (base neutrals, rarely overridden) --- */
-  --core-color-bg: #f7f6f3;
+  /* --- Color: page / surfaces --- */
+  --core-color-bg: #f2f4f6;
   --core-color-surface: #ffffff;
+  --core-color-surface-raised: #fcfcfd;
+  --core-color-surface-sunken: #eef0f4;
   --core-color-border: #e4e1d9;
-  --core-color-text: #1c1b18;
-  --core-color-text-muted: #6b6a63;
+  --core-color-border-strong: #a2a3a8;
+
+  /* --- Color: text --- */
+  --core-color-text: #16171b;
+  --core-color-text-subtle: #393a41;
+  --core-color-text-muted: #5d5e67;
+  --core-color-text-on-brand: #ffffff;
 
   /* --- Color: semantic (never used as the accent) --- */
   --core-color-success: #2f7a4d;
-  --core-color-warning: #a8641c;
-  --core-color-critical: #b3261e;
-  --core-color-info: #2563a8;
+  --core-color-success-bg: #e7f6ea;
+  --core-color-warning: #a58511;
+  --core-color-warning-bg: #fdf4e8;
+  --core-color-critical: #9c2227;
+  --core-color-critical-bg: #fbe9e9;
 
   /* --- Type --- */
   --core-font-display: 'Inter', -apple-system, system-ui, sans-serif;
@@ -44,14 +61,58 @@
   --core-duration-fast: 120ms;
   --core-duration-base: 200ms;
   --core-duration-slow: 320ms;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --core-color-bg: #131417;
+    --core-color-surface: #1c1d21;
+    --core-color-surface-raised: #202126;
+    --core-color-surface-sunken: #17181b;
+    --core-color-border: #2f3036;
+    --core-color-border-strong: #45464e;
+    --core-color-text: #f2f2f4;
+    --core-color-text-subtle: #c7c8cf;
+    --core-color-text-muted: #9698a3;
+    --core-color-success-bg: #16261c;
+    --core-color-warning-bg: #2c220f;
+    --core-color-critical-bg: #2b1518;
+    color-scheme: dark;
+  }
 }
 
 :root[data-theme='dark'] {
-  --core-color-bg: #16161a;
-  --core-color-surface: #1e1e22;
-  --core-color-border: #2f2f35;
-  --core-color-text: #ece9e1;
-  --core-color-text-muted: #a3a094;
+  --core-color-bg: #131417;
+  --core-color-surface: #1c1d21;
+  --core-color-surface-raised: #202126;
+  --core-color-surface-sunken: #17181b;
+  --core-color-border: #2f3036;
+  --core-color-border-strong: #45464e;
+  --core-color-text: #f2f2f4;
+  --core-color-text-subtle: #c7c8cf;
+  --core-color-text-muted: #9698a3;
+  --core-color-success-bg: #16261c;
+  --core-color-warning-bg: #2c220f;
+  --core-color-critical-bg: #2b1518;
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  --core-color-bg: #f2f4f6;
+  --core-color-surface: #ffffff;
+  --core-color-surface-raised: #fcfcfd;
+  --core-color-surface-sunken: #eef0f4;
+  --core-color-border: #e4e1d9;
+  --core-color-border-strong: #a2a3a8;
+  --core-color-text: #16171b;
+  --core-color-text-subtle: #393a41;
+  --core-color-text-muted: #5d5e67;
+  --core-color-success-bg: #e7f6ea;
+  --core-color-warning-bg: #fdf4e8;
+  --core-color-critical-bg: #fbe9e9;
+  color-scheme: light;
 }
 
 @media (prefers-reduced-motion: reduce) {
