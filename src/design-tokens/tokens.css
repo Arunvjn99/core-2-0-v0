@@ -1,0 +1,63 @@
+/**
+ * CORE 2.0 base design tokens.
+ * These are DEFAULTS only — a client theme loaded via core2.client_themes
+ * overrides any of these at runtime by re-setting the same custom properties
+ * on :root (see src/lib/theme.ts). Never hardcode colors/fonts in components;
+ * always reference these variables (or the Tailwind theme() aliases below).
+ *
+ * NOTE: placeholder values below — to be replaced once canonical Figma
+ * screens are extracted (see task "Build design token set").
+ */
+:root {
+  /* --- Color: brand (overridden per client) --- */
+  --core-color-primary: #2f5d50;
+  --core-color-primary-contrast: #ffffff;
+  --core-color-secondary: #a8641c;
+
+  /* --- Color: surface / text (base neutrals, rarely overridden) --- */
+  --core-color-bg: #f7f6f3;
+  --core-color-surface: #ffffff;
+  --core-color-border: #e4e1d9;
+  --core-color-text: #1c1b18;
+  --core-color-text-muted: #6b6a63;
+
+  /* --- Color: semantic (never used as the accent) --- */
+  --core-color-success: #2f7a4d;
+  --core-color-warning: #a8641c;
+  --core-color-critical: #b3261e;
+  --core-color-info: #2563a8;
+
+  /* --- Type --- */
+  --core-font-display: 'Inter', system-ui, sans-serif;
+  --core-font-body: 'Inter', system-ui, sans-serif;
+  --core-font-mono: ui-monospace, monospace;
+
+  /* --- Radius / shadow / spacing scale --- */
+  --core-radius-sm: 6px;
+  --core-radius-md: 10px;
+  --core-radius-lg: 16px;
+  --core-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --core-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  /* --- Motion --- */
+  --core-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --core-duration-fast: 120ms;
+  --core-duration-base: 200ms;
+  --core-duration-slow: 320ms;
+}
+
+:root[data-theme='dark'] {
+  --core-color-bg: #16161a;
+  --core-color-surface: #1e1e22;
+  --core-color-border: #2f2f35;
+  --core-color-text: #ece9e1;
+  --core-color-text-muted: #a3a094;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --core-duration-fast: 0ms;
+    --core-duration-base: 0ms;
+    --core-duration-slow: 0ms;
+  }
+}

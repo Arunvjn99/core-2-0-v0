@@ -1,0 +1,35 @@
+@import 'tailwindcss';
+@import './design-tokens/tokens.css';
+
+@theme {
+  --color-core-primary: var(--core-color-primary);
+  --color-core-secondary: var(--core-color-secondary);
+  --color-core-bg: var(--core-color-bg);
+  --color-core-surface: var(--core-color-surface);
+  --color-core-border: var(--core-color-border);
+  --color-core-text: var(--core-color-text);
+  --color-core-text-muted: var(--core-color-text-muted);
+  --color-core-success: var(--core-color-success);
+  --color-core-warning: var(--core-color-warning);
+  --color-core-critical: var(--core-color-critical);
+  --color-core-info: var(--core-color-info);
+  --font-core-display: var(--core-font-display);
+  --font-core-body: var(--core-font-body);
+  --radius-core-sm: var(--core-radius-sm);
+  --radius-core-md: var(--core-radius-md);
+  --radius-core-lg: var(--core-radius-lg);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--core-color-bg);
+  color: var(--core-color-text);
+  font-family: var(--core-font-body);
+  color-scheme: light dark;
+}
