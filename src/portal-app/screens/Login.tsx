@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../lib/AuthContext'
 import { TextField } from '../../ui-kit/primitives/TextField'
 import { Button } from '../../ui-kit/primitives/Button'
+import { IconEye, IconEyeOff } from '../../ui-kit/icons'
 import hero from '../../assets/login/hero.png'
 import logo from '../../assets/login/logo.svg'
 import wordmark from '../../assets/login/wordmark.svg'
@@ -101,7 +102,7 @@ export default function Login() {
                   className="text-core-text-muted hover:text-core-text"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showPassword ? <EyeOff /> : <Eye />}
+                  {showPassword ? <IconEyeOff className="size-4" /> : <IconEye className="size-4" />}
                 </button>
               }
             />
@@ -141,31 +142,5 @@ export default function Login() {
         </p>
       </div>
     </div>
-  )
-}
-
-function Eye() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
-      <path
-        d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5Z"
-        stroke="currentColor"
-        strokeWidth="1.3"
-      />
-      <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.3" />
-    </svg>
-  )
-}
-function EyeOff() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
-      <path
-        d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5Z"
-        stroke="currentColor"
-        strokeWidth="1.3"
-      />
-      <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.3" />
-      <path d="M2 14 14 2" stroke="currentColor" strokeWidth="1.3" />
-    </svg>
   )
 }

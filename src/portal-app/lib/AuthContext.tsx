@@ -19,10 +19,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session)
       setLoading(false)
+      if (data.session) void ensureParticipantRow(data.session.user)
     })
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => setSession(s))
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+      setSession(s)
+      if (s) void ensureParticipantRow(s.user)
+    })
     return () => sub.subscription.unsubscribe()
   }, [])
+
+  // core2.saved_plans / core2.feedback FK to core2.participants — make sure
+  // the row exists the first time we see this user, instead of requiring a
+  // separate signup step.
+  async function ensureParticipantRow(user: Session['user']) {
+    const meta = user.user_metadata as { first_name?: string; last_name?: string; full_name?: string }
+    await supabase.from('participants').upsert(
+      {
+        id: user.id,
+        first_name: meta?.first_name ?? meta?.full_name?.split(' ')[0] ?? null,
+        last_name: meta?.last_name ?? meta?.full_name?.split(' ').slice(1).join(' ') ?? null,
+      },
+      { onConflict: 'id', ignoreDuplicates: true },
+    )
+  }
 
   async function signInWithPassword(email: string, password: string) {
     const { error } = await supabase.auth.signInWithPassword({ email, password })

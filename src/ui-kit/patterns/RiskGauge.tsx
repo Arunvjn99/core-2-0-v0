@@ -4,8 +4,9 @@
  * themeable (no baked colors) and scales cleanly.
  */
 const LEVELS = ['Conservative', 'Moderate Conservative', 'Moderate', 'Moderate Aggressive', 'Aggressive'] as const
+export type RiskLevel = (typeof LEVELS)[number]
 
-export function RiskGauge({ level }: { level: (typeof LEVELS)[number] }) {
+export function RiskGauge({ level }: { level: RiskLevel }) {
   const index = LEVELS.indexOf(level)
   const angle = -90 + (index / (LEVELS.length - 1)) * 180 // -90deg..+90deg across the semicircle
 

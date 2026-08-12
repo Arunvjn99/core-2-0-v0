@@ -28,8 +28,8 @@
   --core-color-info: #2563a8;
 
   /* --- Type --- */
-  --core-font-display: 'Inter', system-ui, sans-serif;
-  --core-font-body: 'Inter', system-ui, sans-serif;
+  --core-font-display: 'Inter', -apple-system, system-ui, sans-serif;
+  --core-font-body: 'Inter', -apple-system, system-ui, sans-serif;
   --core-font-mono: ui-monospace, monospace;
 
   /* --- Radius / shadow / spacing scale --- */

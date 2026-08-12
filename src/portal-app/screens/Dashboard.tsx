@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AppShell } from '../../ui-kit/patterns/AppShell'
 import { PlanCard, type Plan } from '../../ui-kit/patterns/PlanCard'
 import { RiskGauge } from '../../ui-kit/patterns/RiskGauge'
 import { IconSparkles } from '../../ui-kit/icons'
 import { useAuth } from '../lib/AuthContext'
+import { fetchLatestRiskProfile, type RiskProfilePlan } from '../lib/riskProfile'
 import wavingHand from '../../assets/dashboard/waving-hand.png'
 import learningIllustration from '../../assets/dashboard/learning-illustration.png'
 
@@ -25,6 +26,23 @@ export default function Dashboard() {
   const { session } = useAuth()
   const navigate = useNavigate()
   const [showIneligible, setShowIneligible] = useState(true)
+  const [riskProfile, setRiskProfile] = useState<RiskProfilePlan | null>(null)
+  const [riskLoading, setRiskLoading] = useState(true)
+
+  useEffect(() => {
+    if (!session) return
+    let cancelled = false
+    fetchLatestRiskProfile(session.user.id)
+      .then((profile) => {
+        if (!cancelled) setRiskProfile(profile)
+      })
+      .finally(() => {
+        if (!cancelled) setRiskLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [session])
 
   const firstName = useMemo(() => {
     const meta = session?.user.user_metadata as { first_name?: string; full_name?: string } | undefined
@@ -118,24 +136,49 @@ export default function Dashboard() {
           <div className="flex flex-col items-center gap-4">
             <div className="flex w-full items-center justify-between">
               <p className="text-[18px] font-semibold text-core-text">Risk Level</p>
-              <span className="rounded-full bg-[#fdf4e8] px-2 py-1 text-[14px] font-semibold text-[#a58511]">
-                Moderate Investor
-              </span>
+              {riskProfile && (
+                <span className="rounded-full bg-[#fdf4e8] px-2 py-1 text-[14px] font-semibold text-[#a58511]">
+                  {riskProfile.level} Investor
+                </span>
+              )}
             </div>
-            <RiskGauge level="Moderate" />
-            <p className="text-[16px] font-semibold tracking-tight text-core-text">MODERATE</p>
-            <p className="text-center text-[12px] leading-[18px] text-core-text-muted">
-              We picked this investment style based on how you answered the questionnaire. Want to
-              change it? You can go back and update your answers.
-            </p>
-            <button
-              onClick={() => navigate('/investments/preferences')}
-              className="flex items-center gap-2 rounded-core-sm px-3 py-2 text-[12px] font-medium text-white"
-              style={{ backgroundImage: 'linear-gradient(90deg, #05cded 14.6%, #01afe6 107.38%)' }}
-            >
-              <IconSparkles className="size-4" />
-              Edit Preferences
-            </button>
+
+            {riskLoading ? (
+              <p className="py-8 text-[14px] text-core-text-muted">Loading…</p>
+            ) : riskProfile ? (
+              <>
+                <RiskGauge level={riskProfile.level} />
+                <p className="text-[16px] font-semibold uppercase tracking-tight text-core-text">
+                  {riskProfile.level}
+                </p>
+                <p className="text-center text-[12px] leading-[18px] text-core-text-muted">
+                  We picked this investment style based on how you answered the questionnaire. Want to
+                  change it? You can go back and update your answers.
+                </p>
+                <button
+                  onClick={() => navigate('/enrollment')}
+                  className="flex items-center gap-2 rounded-core-sm px-3 py-2 text-[12px] font-medium text-white"
+                  style={{ backgroundImage: 'linear-gradient(90deg, #05cded 14.6%, #01afe6 107.38%)' }}
+                >
+                  <IconSparkles className="size-4" />
+                  Edit Preferences
+                </button>
+              </>
+            ) : (
+              <>
+                <p className="text-center text-[13px] text-core-text-muted">
+                  Take the quick questionnaire to see your personalized risk level.
+                </p>
+                <button
+                  onClick={() => navigate('/enrollment')}
+                  className="flex items-center gap-2 rounded-core-sm px-3 py-2 text-[12px] font-medium text-white"
+                  style={{ backgroundImage: 'linear-gradient(90deg, #05cded 14.6%, #01afe6 107.38%)' }}
+                >
+                  <IconSparkles className="size-4" />
+                  Take Questionnaire
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
