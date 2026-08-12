@@ -1,16 +1,31 @@
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { AuthProvider } from './portal-app/lib/AuthContext'
+import ProtectedRoute from './portal-app/lib/ProtectedRoute'
+import Login from './portal-app/screens/Login'
+import Dashboard from './portal-app/screens/Dashboard'
+import ComingSoon from './portal-app/screens/ComingSoon'
+
 export default function App() {
   return (
-    <main className="flex min-h-full flex-col items-center justify-center gap-2 p-8">
-      <p className="text-xs font-semibold uppercase tracking-wide text-core-text-muted">
-        CORE 2.0
-      </p>
-      <h1 className="font-core-display text-2xl text-core-text">
-        Participant portal — scaffold ready
-      </h1>
-      <p className="max-w-md text-center text-sm text-core-text-muted">
-        Design tokens, Tailwind, and Supabase (schema: <code>core2</code>) are wired up.
-        Screens land in <code>src/portal-app/screens</code>.
-      </p>
-    </main>
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+
+          <Route element={<ProtectedRoute />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/enrollment" element={<ComingSoon title="Enrollment questionnaire" />} />
+            <Route path="/profile" element={<ComingSoon title="Profile" />} />
+            <Route path="/transactions" element={<ComingSoon title="Transactions" />} />
+            <Route path="/statements" element={<ComingSoon title="Account Statements" />} />
+            <Route path="/investments" element={<ComingSoon title="Investment Portfolio" />} />
+            <Route path="/investments/preferences" element={<ComingSoon title="Edit Risk Preferences" />} />
+          </Route>
+
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   )
 }

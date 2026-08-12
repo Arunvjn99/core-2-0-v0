@@ -3,6 +3,7 @@
 
 @theme {
   --color-core-primary: var(--core-color-primary);
+  --color-core-primary-contrast: var(--core-color-primary-contrast);
   --color-core-secondary: var(--core-color-secondary);
   --color-core-bg: var(--core-color-bg);
   --color-core-surface: var(--core-color-surface);
