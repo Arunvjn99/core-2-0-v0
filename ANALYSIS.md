@@ -385,25 +385,39 @@ live demo remains the authoritative source for this round's build.
       something further exploration here can resolve — nothing more to
       extract from them this way.
 
-### Still open after round 5
+### Round 6 — follow-through (2026-08-13, same session)
 
-- [ ] Re-check whether Dashboard's Recent Transactions / Learning tile /
-      Rate of Return chart should stay — they don't appear in the real
-      live dashboard we now have confirmation of; either they're
-      demo-data-gated in the real app or Figma's static frame oversells
-      what's shipped. Lowest priority — "maybe remove," not "definitely
-      missing."
+- [x] **Converted the enrollment wizard's Auto Increase config to a real
+      slide-over.** `CompoundSavingsModal` → `CompoundSavingsPanel`, now
+      built on `ui-kit/primitives/SlideOver.tsx` (right-edge, dimmed
+      backdrop, spring-in/out) instead of a centered `Modal`. Verified
+      live at 1400px width via a scratch test account: panel slides in
+      from the right over the visible page, closes with its exit
+      animation intact, and re-opens cleanly on a second attempt.
+- [x] **Removed Dashboard's Recent Transactions panel and Learning
+      tile from the post-enrollment view** — the live demo's real
+      post-enrollment dashboard doesn't have this section at all (see
+      round 4's screenshot), confirming Figma's static frame oversold
+      what's actually shipped. Also dropped the now-unused
+      `transaction_requests` count query. The pre-enrollment Learning
+      tile (a separate, different card) was left as-is — that path
+      wasn't part of the round 4 comparison.
+- [x] Full clean build + live re-verification (fresh scratch account,
+      dashboard renders correctly with no errors).
+
+### Still open after round 6
+
 - [ ] Employment Info / Classification fields are read-only display only
       (matches the live app for now) — no edit UI yet if that turns out
       to be needed; also no data seeded for these new columns, so every
       field currently reads "—" for the demo user until seeded.
 - [ ] Transaction and Investment Portfolio screens couldn't be verified
-      against the live demo (both stuck loading on that account, see
-      above) — still built from Figma/earlier-session assumptions only,
-      unverified this round.
-- [ ] Enrollment wizard step panels (e.g. Auto Increase's "Compound your
-      savings") — slide-over vs. modal/inline still unconfirmed at
-      desktop width; carried from round 3.
+      against the live demo (both stuck loading on that account, round
+      5) — still built from Figma/earlier-session assumptions only,
+      unverified.
+- [ ] Rate of Return chart was never built (omitted, not removed) —
+      still absent from the real live dashboard too, so no action
+      needed unless that changes.
 
 ---
 

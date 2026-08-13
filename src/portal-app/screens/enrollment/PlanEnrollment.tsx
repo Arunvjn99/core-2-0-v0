@@ -4,7 +4,7 @@ import { useReducedMotion } from 'framer-motion'
 import { AppShell } from '../../../ui-kit/patterns/AppShell'
 import { RiskGauge } from '../../../ui-kit/patterns/RiskGauge'
 import { Button } from '../../../ui-kit/primitives/Button'
-import { Modal } from '../../../ui-kit/primitives/Modal'
+import { SlideOver } from '../../../ui-kit/primitives/SlideOver'
 import { IconSparkles } from '../../../ui-kit/icons'
 import { useAuth } from '../../lib/AuthContext'
 import { useToast } from '../../../ui-kit/lib/ToastContext'
@@ -20,9 +20,12 @@ import {
 /**
  * Figma: "Plan Enrollment" 4-step wizard (nodes 2893:56254 Contribution,
  * 2893:58119 Auto Increase cards + 2893:58477 "Compound your savings"
- * modal, 2893:64916 Investments, 2893:59711/60247 Review) — the real
- * "Enroll" flow triggered from a Dashboard plan card, distinct from the
- * risk-profile Questionnaire at /enrollment.
+ * panel, 2893:64916 Investments, 2893:59711/60247 Review) — the real
+ * "Enroll" flow triggered from a Dashboard plan card or the Enrollment
+ * hub, distinct from the risk-profile Questionnaire at
+ * /enrollment/questionnaire. Per-step configuration panels (e.g.
+ * "Compound your savings" below) slide in from the right edge, confirmed
+ * against the live demo (round 4/5) — not a centered modal.
  */
 const STEPS = ['Contribution Election', 'Auto Increase', 'Investment Election', 'Review'] as const
 type Step = (typeof STEPS)[number]
@@ -386,18 +389,24 @@ function AutoIncreaseStep({ value, onChange }: { value: AutoIncrease; onChange: 
         ))}
       </div>
 
-      {modalOpen && (
-        <CompoundSavingsModal value={value} onChange={onChange} onClose={() => setModalOpen(false)} />
-      )}
+      <CompoundSavingsPanel open={modalOpen} value={value} onChange={onChange} onClose={() => setModalOpen(false)} />
     </div>
   )
 }
 
-function CompoundSavingsModal({
+/**
+ * Confirmed against the live demo (round 4/5): per-step configuration
+ * panels like this one slide in from the right edge over the page,
+ * rather than opening as a centered modal — matches the pattern already
+ * used for the Investments fund picker (ui-kit/primitives/SlideOver.tsx).
+ */
+function CompoundSavingsPanel({
+  open,
   value,
   onChange,
   onClose,
 }: {
+  open: boolean
   value: AutoIncrease
   onChange: (v: AutoIncrease) => void
   onClose: () => void
@@ -411,8 +420,8 @@ function CompoundSavingsModal({
   }
 
   return (
-    <Modal title="Compound your savings" onClose={onClose} width={720}>
-      <div className="grid gap-6 sm:grid-cols-[220px_1fr]">
+    <SlideOver open={open} title="Compound your savings" onClose={onClose} width={640}>
+      <div className="grid gap-6">
         <div className="flex flex-col gap-2">
           {[
             { id: 'none', label: 'No Auto Increase', sub: 'Make the same contribution each year.' },
@@ -481,7 +490,7 @@ function CompoundSavingsModal({
           </Button>
         </div>
       </div>
-    </Modal>
+    </SlideOver>
   )
 }
 

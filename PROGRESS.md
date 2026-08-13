@@ -39,6 +39,28 @@ A running record of what's been built, fixed, and decided in this project. Newes
 
 ---
 
+## Session: Enrollment wizard slide-over conversion + Dashboard widget cleanup
+
+- **Auto Increase's "Compound your savings" panel converted from a
+  centered modal to a right-edge slide-over** (`ui-kit/primitives/
+  SlideOver.tsx`) — confirmed as the correct pattern against the live
+  demo across rounds 4/5. Verified live via a disposable scratch test
+  account (created and deleted via the Supabase auth API, since the
+  real demo user's password wasn't available): panel slides in from the
+  right with the page still visible behind it, closes with its exit
+  animation, re-opens cleanly.
+- **Removed Dashboard's Recent Transactions panel and Learning tile
+  from the post-enrollment view** to match the real live dashboard,
+  which doesn't have this section (confirmed via round 4's screenshot).
+  Dropped the now-unused transaction-count query along with it.
+- Full clean build + live verification.
+- Full status in `ANALYSIS.md` ("Round 6"). Remaining open items:
+  Employment Info/Classification fields have no seeded demo data yet,
+  Transaction/Investment Portfolio still can't be verified against the
+  live demo (stuck loading on that account).
+
+---
+
 ## Session: Wizard plan-threading fix + Login responsive layout
 
 - **Fixed the wizard's hardcoded-plan bug**: `PlanEnrollment.tsx` now

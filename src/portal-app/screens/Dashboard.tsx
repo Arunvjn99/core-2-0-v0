@@ -3,12 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { AppShell } from '../../ui-kit/patterns/AppShell'
 import { PlanCard } from '../../ui-kit/patterns/PlanCard'
 import { RiskGauge } from '../../ui-kit/patterns/RiskGauge'
-import { IconSparkles, IconChevronRight } from '../../ui-kit/icons'
+import { IconSparkles } from '../../ui-kit/icons'
 import { useAuth } from '../lib/AuthContext'
 import { fetchLatestRiskProfile, type RiskProfilePlan } from '../lib/riskProfile'
 import { fetchEnrollments, estimateBalances, type Enrollment } from '../lib/enrollment'
 import { DEMO_PLANS } from '../lib/plans'
-import { supabase } from '../../lib/supabaseClient'
 import wavingHand from '../../assets/dashboard/waving-hand.png'
 import learningIllustration from '../../assets/dashboard/learning-illustration.png'
 
@@ -31,7 +30,6 @@ export default function Dashboard() {
   const [riskProfile, setRiskProfile] = useState<RiskProfilePlan | null>(null)
   const [riskLoading, setRiskLoading] = useState(true)
   const [enrollments, setEnrollments] = useState<Enrollment[] | null>(null)
-  const [txCount, setTxCount] = useState<number | null>(null)
 
   useEffect(() => {
     if (!session) return
@@ -43,12 +41,6 @@ export default function Dashboard() {
       .finally(() => !cancelled && setRiskLoading(false))
 
     fetchEnrollments(uid).then((rows) => !cancelled && setEnrollments(rows))
-
-    supabase
-      .from('transaction_requests')
-      .select('id', { count: 'exact', head: true })
-      .eq('participant_id', uid)
-      .then(({ count }) => !cancelled && setTxCount(count ?? 0))
 
     return () => {
       cancelled = true
@@ -109,7 +101,7 @@ export default function Dashboard() {
       <div className="flex flex-col gap-6 lg:flex-row">
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           {isEnrolled ? (
-            <PostEnrollmentSummary firstName={firstName} enrollments={enrollments} txCount={txCount} navigate={navigate} />
+            <PostEnrollmentSummary firstName={firstName} enrollments={enrollments} navigate={navigate} />
           ) : (
             <div
               className="flex items-center rounded-core-md bg-core-surface p-6 shadow-[0_1px_1px_rgba(0,0,0,0.25)] sm:p-8"
@@ -222,16 +214,19 @@ function money(n: number) {
   return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
-/** "Plans you are enrolled in" summary card — Figma node 2893:57381. */
+/**
+ * "Plans you are enrolled in" summary card — Figma node 2893:57381.
+ * Confirmed against the live demo (round 5): the real dashboard doesn't
+ * have a Recent Transactions panel or Learning tile here at all — that
+ * was Figma's static frame oversells; removed to match what's shipped.
+ */
 function PostEnrollmentSummary({
   firstName,
   enrollments,
-  txCount,
   navigate,
 }: {
   firstName: string
   enrollments: Enrollment[]
-  txCount: number | null
   navigate: (path: string) => void
 }) {
   const primary = enrollments[0]
@@ -272,37 +267,6 @@ function PostEnrollmentSummary({
       >
         View summary
       </button>
-
-      <div className="mt-2 grid grid-cols-1 gap-4 border-t border-core-border pt-4 md:grid-cols-3">
-        <div className="rounded-core-sm border border-core-border p-4 md:col-span-1">
-          <p className="text-[13px] font-semibold text-core-text-muted">Recent Transactions</p>
-          {txCount ? (
-            <>
-              <p className="mt-3 text-[15px] font-semibold text-core-text">
-                {txCount} request{txCount === 1 ? '' : 's'}
-              </p>
-              <button onClick={() => navigate('/transactions')} className="mt-2 text-[13px] font-semibold text-core-info">
-                See all <IconChevronRight className="ml-0.5 inline size-2.5" />
-              </button>
-            </>
-          ) : (
-            <>
-              <p className="mt-3 text-[13px] text-core-text-muted">No Transactions Yet</p>
-              <p className="text-[12px] text-core-text-muted/80">Start contributing to see your transactions here.</p>
-            </>
-          )}
-        </div>
-        <div className="flex flex-col items-start gap-2 rounded-core-sm bg-core-info/5 p-4 md:col-span-2">
-          <span className="flex items-center gap-1 rounded-full bg-core-primary/10 px-2 py-1 text-[12px] font-medium text-core-primary">
-            🎓 Learning
-          </span>
-          <p className="text-[14px] font-medium text-core-text-muted">Financial Wellness</p>
-          <p className="text-[12px] text-core-text-muted/80">Learn about planning, saving, investing wisely</p>
-          <button className="rounded-[6px] border border-core-info bg-core-info px-3.5 py-1 text-[12px] font-medium text-core-info-contrast">
-            Know More
-          </button>
-        </div>
-      </div>
     </div>
   )
 }
