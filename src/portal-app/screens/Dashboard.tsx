@@ -156,7 +156,13 @@ export default function Dashboard() {
             <div className="flex flex-col gap-4 md:flex-row">
               <div className="flex flex-1 flex-col gap-4">
                 {visibleExplorablePlans.map((plan) => (
-                  <PlanCard key={plan.id} plan={plan} onEnroll={() => navigate('/enroll')} />
+                  <PlanCard
+                    key={plan.id}
+                    plan={plan}
+                    onEnroll={() =>
+                      navigate(`/enroll?planId=${encodeURIComponent(plan.planId)}&planName=${encodeURIComponent(plan.name)}`)
+                    }
+                  />
                 ))}
                 {visibleExplorablePlans.length === 0 && (
                   <p className="rounded-core-md border border-dashed border-core-border p-6 text-center text-core-text-muted">

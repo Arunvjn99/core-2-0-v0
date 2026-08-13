@@ -39,6 +39,29 @@ A running record of what's been built, fixed, and decided in this project. Newes
 
 ---
 
+## Session: Wizard plan-threading fix + Login responsive layout
+
+- **Fixed the wizard's hardcoded-plan bug**: `PlanEnrollment.tsx` now
+  reads `?planId=&planName=` from the URL — every Enroll button
+  (Dashboard's PlanCard, the Enrollment hub's Enroll cards) passes the
+  actual clicked plan through instead of every enrollment silently
+  writing the same demo plan (124542) regardless of which card was
+  clicked. Falls back to the original default only for a direct
+  `/enroll` visit. Verified live with a second plan.
+- **Login page made responsive**: replaced Figma's literal fixed pixel
+  values (638px brand panel, 474/855px card, 52px hero text, 124px
+  gap, 45px logo, 31px heading) with `clamp()` equivalents. Verified
+  live at 1024px and 900px — no overflow, scales fluidly instead of
+  breaking between the one size it was pixel-perfect at and the `lg`
+  breakpoint's hidden-panel fallback.
+- Re-attempted Transaction and Investment Portfolio against the live
+  demo — both hang on an infinite loading spinner on this demo account
+  (confirmed twice); logged as a live-app data issue, not something
+  buildable from here without different demo data.
+- Full checklist status in `ANALYSIS.md` ("Round 5").
+
+---
+
 ## Session: Enrollment plan-browser IA fix + Manage Plan + Profile Employment/Classification split
 
 Continuation of the live-demo-driven round 4 work — built the three

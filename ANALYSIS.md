@@ -358,7 +358,34 @@ live demo remains the authoritative source for this round's build.
       restart: Dashboard → Enrollment hub → Manage Plan → Profile's new
       tabs, all screenshotted and confirmed against the live reference.
 
-### Still open after round 4
+### Round 5 — follow-through (2026-08-13, same session)
+
+- [x] **Fixed the hardcoded-plan bug**: `PlanEnrollment.tsx` now reads
+      `?planId=&planName=` from the URL (Dashboard's PlanCard and the
+      Enrollment hub's Enroll button both pass them), falling back to
+      the original demo plan only when `/enroll` is opened directly.
+      Verified live: enrolling via "401(K) Mindblock Simple" now shows
+      that plan's actual name/ID throughout the wizard and Review step,
+      not the old always-124542 default.
+- [x] **Login page responsive layout** — replaced every literal Figma
+      pixel value (638px panel, 474/855px card, 52px hero text, 124px
+      gap, 45px logo, 31px heading) with `clamp()` equivalents that
+      scale fluidly between a floor and the original Figma value.
+      Verified live at 1024px and 900px widths: no overflow, brand panel
+      degrades to hidden below `lg` as before, full-width layout still
+      matches the original design at native size.
+- [x] Re-checked Documents against the live demo — structurally already
+      close (search, Generate Statement, records list, empty state);
+      no changes made this round, logged as "good enough" rather than
+      re-verified pixel-for-pixel.
+- [x] Attempted Transaction and Investment Portfolio against the live
+      demo again — **both hang on an infinite "Loading…" spinner on
+      this demo account** (confirmed twice, not a fluke). This is a
+      live-app data/backend issue on their end for this account, not
+      something further exploration here can resolve — nothing more to
+      extract from them this way.
+
+### Still open after round 5
 
 - [ ] Re-check whether Dashboard's Recent Transactions / Learning tile /
       Rate of Return chart should stay — they don't appear in the real
@@ -370,19 +397,13 @@ live demo remains the authoritative source for this round's build.
       (matches the live app for now) — no edit UI yet if that turns out
       to be needed; also no data seeded for these new columns, so every
       field currently reads "—" for the demo user until seeded.
-- [ ] Transaction and Documents screens still unexplored against the
-      live demo (round 4's transaction screen didn't finish loading);
-      Investment Portfolio also unexplored.
-- [ ] Login page responsive layout (fixed px sizing) — carried from
-      round 3, not touched this round.
+- [ ] Transaction and Investment Portfolio screens couldn't be verified
+      against the live demo (both stuck loading on that account, see
+      above) — still built from Figma/earlier-session assumptions only,
+      unverified this round.
 - [ ] Enrollment wizard step panels (e.g. Auto Increase's "Compound your
       savings") — slide-over vs. modal/inline still unconfirmed at
       desktop width; carried from round 3.
-- [ ] `PlanEnrollment.tsx`'s wizard always writes to the same hardcoded
-      `PLAN` regardless of which Enrollment-hub/Dashboard card triggered
-      it — pre-existing simplification, now more visible since the hub
-      shows multiple distinct eligible plans. Needs the clicked plan's
-      id/name threaded through to the wizard instead.
 
 ---
 

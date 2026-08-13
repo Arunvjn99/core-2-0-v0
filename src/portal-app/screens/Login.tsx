@@ -13,6 +13,13 @@ import wordmark from '../../assets/login/wordmark.svg'
  * Figma: node 2893:53629 "Login with password" (canonical — rightmost of 4 variants).
  * Left brand panel (hero image, gradient, logo) is the default demo theme;
  * admin console will let this be swapped per client.
+ *
+ * Round 4 follow-up: the original implementation copied Figma's literal
+ * fixed pixel values (638px panel, 474/855px card, 52px hero text, etc.)
+ * almost verbatim — reproduces the design exactly at one viewport size
+ * but doesn't scale down cleanly on narrower desktop widths. Sizes below
+ * use clamp() so everything scales fluidly between a minimum and the
+ * original Figma value instead of jumping at breakpoints.
  */
 export default function Login() {
   const { signInWithPassword } = useAuth()
@@ -44,8 +51,8 @@ export default function Login() {
     <div className="relative flex h-svh w-full overflow-y-auto bg-core-surface lg:overflow-hidden">
       <ThemeToggle className="fixed right-4 top-4 z-10 bg-core-surface shadow-core-sm" />
       {/* Brand panel */}
-      <div className="hidden w-[638px] shrink-0 items-center justify-center p-[82px] lg:flex">
-        <div className="relative flex h-[855px] w-full max-w-[474px] flex-col items-center justify-between overflow-hidden rounded-[17px] px-12 pb-11 pt-14 text-white">
+      <div className="hidden w-[clamp(400px,38vw,638px)] shrink-0 items-center justify-center p-[clamp(24px,5vw,82px)] lg:flex">
+        <div className="relative flex h-[clamp(560px,82vh,855px)] w-full max-w-[474px] flex-col items-center justify-between overflow-hidden rounded-[17px] px-[clamp(24px,4vw,48px)] pb-[clamp(24px,4vh,44px)] pt-[clamp(28px,5vh,56px)] text-white">
           <img
             src={hero}
             alt=""
@@ -60,7 +67,7 @@ export default function Login() {
             }}
             aria-hidden
           />
-          <p className="relative z-10 self-start text-[52px] font-light leading-[1.1]">
+          <p className="relative z-10 self-start text-[clamp(30px,4vw,52px)] font-light leading-[1.1]">
             Retirement
             <br />
             <span className="font-bold">Simplified!</span>
@@ -74,15 +81,15 @@ export default function Login() {
 
       {/* Form panel */}
       <div className="flex min-h-full flex-1 flex-col items-center justify-center overflow-y-auto px-6 py-12 shadow-[0_1px_10px_rgba(0,0,0,0.05),0_4px_5px_rgba(0,0,0,0.08),0_2px_4px_-1px_rgba(0,0,0,0.12)] sm:px-16">
-        <form onSubmit={handleSubmit} className="flex w-full max-w-[499px] flex-col items-end gap-16">
+        <form onSubmit={handleSubmit} className="flex w-full max-w-[499px] flex-col items-end gap-[clamp(32px,6vh,64px)]">
           <div className="flex w-full flex-col gap-6">
-            <div className="flex w-full flex-col items-start gap-[124px]">
+            <div className="flex w-full flex-col items-start gap-[clamp(32px,10vh,124px)]">
               <img
                 src={logo}
                 alt=""
-                className="h-[45px] rounded-lg bg-white px-2 py-1"
+                className="h-[clamp(32px,4vw,45px)] rounded-lg bg-white px-2 py-1"
               />
-              <h1 className="text-[31px] font-bold text-core-text">Login</h1>
+              <h1 className="text-[clamp(22px,2.5vw,31px)] font-bold text-core-text">Login</h1>
             </div>
 
             <TextField

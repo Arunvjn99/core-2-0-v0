@@ -129,7 +129,9 @@ export default function EnrollmentHub() {
                   </div>
                 </div>
                 <button
-                  onClick={() => navigate('/enroll')}
+                  onClick={() =>
+                    navigate(`/enroll?planId=${encodeURIComponent(plan.planId)}&planName=${encodeURIComponent(plan.name)}`)
+                  }
                   disabled={!plan.eligible}
                   className="flex w-full items-center justify-center gap-2 rounded-core-sm border border-core-info py-2.5 text-[14px] font-semibold text-core-info disabled:cursor-not-allowed disabled:border-core-border-strong disabled:text-core-text-muted"
                 >

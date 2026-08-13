@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useReducedMotion } from 'framer-motion'
 import { AppShell } from '../../../ui-kit/patterns/AppShell'
 import { RiskGauge } from '../../../ui-kit/patterns/RiskGauge'
@@ -34,12 +34,20 @@ const STEP_COPY: Record<Step, string> = {
   Review: 'Review your elections before enrolling into the plan',
 }
 
-const PLAN = { name: '401(K) Company Plan High Returns', id: '124542' }
+const DEFAULT_PLAN = { name: '401(K) Company Plan High Returns', id: '124542' }
 
 export default function PlanEnrollment() {
   const { session } = useAuth()
   const { show } = useToast()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  // Enroll cards on the Dashboard / Enrollment hub pass ?planId=&planName=
+  // for the plan that was actually clicked — falls back to the demo
+  // default only when landed on directly (e.g. a bookmarked /enroll link).
+  const PLAN = {
+    id: searchParams.get('planId') ?? DEFAULT_PLAN.id,
+    name: searchParams.get('planName') ?? DEFAULT_PLAN.name,
+  }
   const reduceMotion = useReducedMotion()
   const [stepIndex, setStepIndex] = useState(0)
   // direction (forward/back) is tracked for a possible future re-add of a
@@ -160,7 +168,7 @@ export default function PlanEnrollment() {
                 <InvestmentStep value={investments} onChange={setInvestments} />
               )}
               {step === 'Review' && (
-                <ReviewStep contribution={contribution} autoIncrease={autoIncrease} investments={investments} />
+                <ReviewStep plan={PLAN} contribution={contribution} autoIncrease={autoIncrease} investments={investments} />
               )}
             </div>
 
@@ -535,10 +543,12 @@ function InvestmentStep({ value, onChange }: { value: EnrollmentInvestments; onC
  * entirely and just listed the elections.
  */
 function ReviewStep({
+  plan,
   contribution,
   autoIncrease,
   investments,
 }: {
+  plan: { id: string; name: string }
   contribution: Contribution
   autoIncrease: AutoIncrease
   investments: EnrollmentInvestments
@@ -620,9 +630,9 @@ function ReviewStep({
         </div>
 
         <p className="text-[12px] text-core-text-muted">Plan Details</p>
-        <p className="mb-1 text-[15px] font-semibold text-core-text">{PLAN.name}</p>
+        <p className="mb-1 text-[15px] font-semibold text-core-text">{plan.name}</p>
         <p className="mb-4 text-[12px] text-core-text-muted">
-          Plan ID {PLAN.id} · Type 401(K)
+          Plan ID {plan.id} · Type 401(K)
         </p>
 
         <div className="mb-4 border-t border-core-border pt-4">
