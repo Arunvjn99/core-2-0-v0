@@ -18,13 +18,15 @@ import {
 } from '../lib/profile'
 
 /**
- * Figma: mobile-first Profile flow — Personal Details (2893:12648), Edit
- * Personal Details (2893:12743), Employment details (2893:12559),
- * Beneficiary details (2893:13321). Rebuilt as tabs on one responsive
- * screen rather than separate mobile pages, since the desktop app doesn't
- * need a phone-only navigation pattern — same sections, same fields.
+ * Confirmed live (round 4): Profile's real menu has 5 sub-screens —
+ * Personal Details, Bank Details, Employment Information, Employee
+ * Classification (a distinct screen from Employment Information, not the
+ * same tab), Beneficiary Details. Rebuilt as tabs on one responsive
+ * screen rather than separate full-page navigations, since the desktop
+ * app doesn't need a phone-only navigation pattern — same sections, same
+ * fields as the live app.
  */
-const TABS = ['Personal Details', 'Bank Details', 'Employment', 'Beneficiaries'] as const
+const TABS = ['Personal Details', 'Bank Details', 'Employment Info', 'Classification', 'Beneficiaries'] as const
 type Tab = (typeof TABS)[number]
 
 export default function Profile() {
@@ -54,7 +56,8 @@ export default function Profile() {
 
         {tab === 'Personal Details' && <PersonalDetailsTab />}
         {tab === 'Bank Details' && <BankDetailsTab />}
-        {tab === 'Employment' && <EmploymentTab />}
+        {tab === 'Employment Info' && <EmploymentInfoTab />}
+        {tab === 'Classification' && <ClassificationTab />}
         {tab === 'Beneficiaries' && <BeneficiariesTab />}
       </div>
     </AppShell>
@@ -331,7 +334,21 @@ function BankDetailsTab() {
   )
 }
 
-function EmploymentTab() {
+function yesNo(v: boolean) {
+  return v ? 'Yes' : 'No'
+}
+
+function fmtDate(d: string | null | undefined) {
+  return d ? new Date(d).toLocaleDateString() : '—'
+}
+
+/**
+ * Confirmed live (round 4): payroll frequency, date of hire, QDRO status,
+ * ownership %, family-of-owner/officer/HCE/key-employee/insider flags,
+ * and a "Rehire details" block — read-only, sourced from payroll/HR
+ * integration in the real app, same here.
+ */
+function EmploymentInfoTab() {
   const { session } = useAuth()
   const [profile, setProfile] = useState<ParticipantProfile | null>(null)
   const [loading, setLoading] = useState(true)
@@ -348,12 +365,70 @@ function EmploymentTab() {
 
   return (
     <div className="flex flex-col gap-5 rounded-core-md bg-core-surface p-6 shadow-core-sm">
-      <h3 className="text-[16px] font-semibold text-core-text">Employment details</h3>
+      <h3 className="text-[16px] font-semibold text-core-text">Employment Information</h3>
       <div className="grid gap-4 sm:grid-cols-2">
         <ReadField label="Payroll Frequency" value={profile?.payroll_frequency ?? 'Monthly'} />
-        <ReadField label="Employee Classification" value={profile?.employee_classification ?? 'Permanent'} />
+        <ReadField label="Date of hire" value={fmtDate(profile?.date_of_hire)} />
+        <ReadField label="Pending Qualified Domestic Relations Order (QDRO)" value={yesNo(!!profile?.qdro_pending)} />
+        <ReadField label="Ownership %" value={profile?.ownership_pct != null ? `${profile.ownership_pct}%` : '—'} />
+        <ReadField label="Family member of owner" value={yesNo(!!profile?.is_family_of_owner)} />
+        <ReadField label="Officer" value={yesNo(!!profile?.is_officer)} />
+        <ReadField label="Highly Compensated Employee (HCE)" value={yesNo(!!profile?.is_hce)} />
+        <ReadField label="Key employee" value={yesNo(!!profile?.is_key_employee)} />
+        <ReadField label="Insider / Restricted employee" value={yesNo(!!profile?.is_insider)} />
         <ReadField label="Employer" value={profile?.employer_name} />
         <ReadField label="Employee ID" value={profile?.employee_id} />
+      </div>
+
+      <div className="border-t border-core-border pt-4">
+        <h4 className="mb-3 text-[14px] font-semibold text-core-text">Rehire details</h4>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <ReadField label="Most recent rehire date" value={fmtDate(profile?.most_recent_rehire_date)} />
+          <ReadField label="Most recent term date" value={fmtDate(profile?.most_recent_term_date)} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Confirmed live (round 4): Location/Division/Department/Paycode,
+ * classification type/code/name/dates, and a Classification History
+ * section — a distinct screen from Employment Information.
+ */
+function ClassificationTab() {
+  const { session } = useAuth()
+  const [profile, setProfile] = useState<ParticipantProfile | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!session) return
+    fetchProfile(session.user.id).then((p) => {
+      setProfile(p)
+      setLoading(false)
+    })
+  }, [session])
+
+  if (loading) return <p className="text-core-text-muted">Loading…</p>
+
+  return (
+    <div className="flex flex-col gap-5 rounded-core-md bg-core-surface p-6 shadow-core-sm">
+      <h3 className="text-[16px] font-semibold text-core-text">Employee Classification</h3>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <ReadField label="Location" value={profile?.location} />
+        <ReadField label="Division" value={profile?.division} />
+        <ReadField label="Department" value={profile?.department} />
+        <ReadField label="Paycode" value={profile?.paycode} />
+        <ReadField label="Classification type" value={profile?.classification_type} />
+        <ReadField label="Classification code" value={profile?.classification_code} />
+        <ReadField label="Classification name" value={profile?.classification_name} />
+        <ReadField label="Classification start date" value={fmtDate(profile?.classification_start_date)} />
+        <ReadField label="Classification end date" value={fmtDate(profile?.classification_end_date)} />
+      </div>
+
+      <div className="border-t border-core-border pt-4">
+        <h4 className="mb-2 text-[14px] font-semibold text-core-text">Classification History</h4>
+        <p className="text-[13px] text-core-text-muted">No prior classification changes on record.</p>
       </div>
     </div>
   )

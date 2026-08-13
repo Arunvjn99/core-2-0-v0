@@ -39,6 +39,48 @@ A running record of what's been built, fixed, and decided in this project. Newes
 
 ---
 
+## Session: Enrollment plan-browser IA fix + Manage Plan + Profile Employment/Classification split
+
+Continuation of the live-demo-driven round 4 work — built the three
+remaining items flagged in that round's checklist:
+
+- **Enrollment nav is now a real plan browser** (`EnrollmentHub.tsx`,
+  `/enrollment`): All/Enrolled/Eligible filter chips, dark-gradient
+  "Manage" cards for enrolled plans, white "Enroll" cards for eligible
+  ones — matches the live app's layout. The risk questionnaire moved to
+  `/enrollment/questionnaire`, reachable from the Dashboard's risk
+  widget (Take Questionnaire / Edit Preferences).
+- **New `ManagePlan.tsx`** (`/enrollment/manage-plan?planId=…`) — real
+  per-plan drill-in: balance pair, Contribution Election, Investment
+  Election with a Breakdown toggle, Auto-Features with a per-source ADI
+  table, and working **Opt-Out Plan** (writes `enrollments.status`) /
+  **Edit** actions. Replaces the old `/my-plans` stacked-history screen
+  (now redirects to `/enrollment`).
+- **Profile's Employment tab split into two real tabs**: Employment Info
+  (payroll frequency, date of hire, QDRO, ownership %, officer/HCE/
+  key-employee/insider flags, rehire details) and Classification
+  (location/division/department/paycode, classification type/code/name/
+  dates, classification history) — new `core2.participants` columns for
+  all of it, matches the live app field-for-field.
+- Fixed a latent bug found along the way: two demo plans in the plan
+  catalog shared the same `plan_id` (124542), which would falsely mark
+  one "already enrolled" whenever the other was. Moved the catalog to a
+  shared `lib/plans.ts` so Dashboard and the Enrollment hub can't drift.
+- Checked Figma's "mobile App" page for these screens first (canonical
+  page's ~362 frames are too duplicate-heavy to search reliably by
+  name) — found it's an unrelated prototype (different branding/visual
+  language), not a mobile variant of this app. Disregarded; live demo
+  remained the source of truth.
+- Full clean build + live verification (fresh dev-server restart):
+  Dashboard → Enrollment hub → Manage Plan → Profile's new tabs, all
+  screenshotted against the real live app.
+- Remaining checklist in `ANALYSIS.md`: login responsive layout,
+  Transactions/Documents/Investment Portfolio still unexplored live,
+  enrollment wizard slide-over conversion, and the wizard's hardcoded
+  single `PLAN` needing to thread through the actually-clicked plan.
+
+---
+
 ## Session: Live-demo walkthrough (logged in) + Profile Contact Details / Bank Details
 
 User provided a logged-in session on the real live demo

@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AppShell } from '../../ui-kit/patterns/AppShell'
-import { PlanCard, type Plan } from '../../ui-kit/patterns/PlanCard'
+import { PlanCard } from '../../ui-kit/patterns/PlanCard'
 import { RiskGauge } from '../../ui-kit/patterns/RiskGauge'
 import { IconSparkles, IconChevronRight } from '../../ui-kit/icons'
 import { useAuth } from '../lib/AuthContext'
 import { fetchLatestRiskProfile, type RiskProfilePlan } from '../lib/riskProfile'
-import { fetchEnrollments, type Enrollment } from '../lib/enrollment'
+import { fetchEnrollments, estimateBalances, type Enrollment } from '../lib/enrollment'
+import { DEMO_PLANS } from '../lib/plans'
 import { supabase } from '../../lib/supabaseClient'
 import wavingHand from '../../assets/dashboard/waving-hand.png'
 import learningIllustration from '../../assets/dashboard/learning-illustration.png'
@@ -14,31 +15,14 @@ import learningIllustration from '../../assets/dashboard/learning-illustration.p
 /**
  * Figma: pre-enrollment node 2893:56916 "Dashboard-not-enrolled-pre
  * enrollment", post-enrollment node 2893:57381 "Dashboard-Post enrolled".
- * The two are genuinely different layouts, not a toggle within one screen —
- * which dashboard a participant sees is driven entirely by whether
- * `core2.enrollments` has any row for them (see lib/enrollment.ts), never
- * a hardcoded flag. First-time users land pre-enrollment, pick a plan,
- * finish the /enroll wizard, and from then on see the post-enrollment
- * dashboard with a "My Plans" summary + an "Explore more plans" section
- * for anything else they're eligible for.
- *
- * TODO(follow-up): plan catalog (name/id/type/eligibility) is still static
- * demo data — no `core2.plans` catalog table exists yet. Once it does,
- * replace DEMO_PLANS with a live query; the enrolled/eligible filtering
- * logic below already keys off `plan_id`, so the swap is contained here.
+ * Confirmed against the live demo (round 4): which dashboard a participant
+ * sees is driven entirely by whether `core2.enrollments` has any row for
+ * them (see lib/enrollment.ts), never a hardcoded flag. First-time users
+ * land pre-enrollment, pick a plan, finish the /enroll wizard, and from
+ * then on see the post-enrollment dashboard. The plan catalog lives in
+ * lib/plans.ts, shared with the Enrollment hub (/enrollment) so the two
+ * screens never drift.
  */
-const DEMO_PLANS: Plan[] = [
-  { id: 'p1', name: '401(K) Company Plan High Returns', planId: '124542', type: '401(K)', eligible: true },
-  { id: 'p2', name: '401(K) Mindblock Simple', planId: '124542', type: '401(K)', eligible: true },
-  {
-    id: 'p3',
-    name: '401(K) Save More',
-    planId: '124599',
-    type: '401(K)',
-    eligible: false,
-    ineligibleReason: 'Requires 90 days of employment',
-  },
-]
 
 export default function Dashboard() {
   const { session } = useAuth()
@@ -91,7 +75,7 @@ export default function Dashboard() {
           We picked this investment style based on how you answered the questionnaire. Want to change it? You can
           go back and update your answers.
         </p>
-        <button onClick={() => navigate('/enrollment')} className="dashboard-cta-btn">
+        <button onClick={() => navigate('/enrollment/questionnaire')} className="dashboard-cta-btn">
           <IconSparkles className="size-4" />
           Edit Preferences
         </button>
@@ -101,7 +85,7 @@ export default function Dashboard() {
         <p className="text-center text-[13px] text-core-text-muted">
           Take the quick questionnaire to see your personalized risk level.
         </p>
-        <button onClick={() => navigate('/enrollment')} className="dashboard-cta-btn">
+        <button onClick={() => navigate('/enrollment/questionnaire')} className="dashboard-cta-btn">
           <IconSparkles className="size-4" />
           Take Questionnaire
         </button>
@@ -245,12 +229,7 @@ function PostEnrollmentSummary({
   navigate: (path: string) => void
 }) {
   const primary = enrollments[0]
-  // No balances/holdings table exists yet (core2 tracks elections, not
-  // ledger data) — these two figures are placeholders derived deterministically
-  // from the plan id so they're stable per participant rather than random.
-  const seed = primary.plan_id.split('').reduce((s, c) => s + c.charCodeAt(0), 0)
-  const totalBalance = 10000 + (seed % 20) * 500
-  const vestedBalance = totalBalance * 0.85
+  const { totalBalance, vestedBalance } = estimateBalances(primary.plan_id)
 
   return (
     <div className="flex flex-col gap-4 rounded-core-md bg-core-surface p-6 shadow-[0_1px_1px_rgba(0,0,0,0.25)] sm:p-8">
@@ -281,7 +260,10 @@ function PostEnrollmentSummary({
           </div>
         </div>
       </div>
-      <button onClick={() => navigate('/my-plans')} className="self-start text-[14px] font-semibold text-core-info">
+      <button
+        onClick={() => navigate(`/enrollment/manage-plan?planId=${encodeURIComponent(primary.plan_id)}`)}
+        className="self-start text-[14px] font-semibold text-core-info"
+      >
         View summary
       </button>
 

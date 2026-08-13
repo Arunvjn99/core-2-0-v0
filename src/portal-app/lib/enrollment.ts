@@ -45,6 +45,19 @@ export type Enrollment = {
 }
 
 /**
+ * No balances/holdings ledger table exists yet (core2 tracks elections,
+ * not account balances) — these are placeholders derived deterministically
+ * from the plan id so they're stable per participant/plan rather than
+ * random, and so Dashboard and the Manage Plan screen always agree.
+ */
+export function estimateBalances(planId: string) {
+  const seed = planId.split('').reduce((s, c) => s + c.charCodeAt(0), 0)
+  const totalBalance = 10000 + (seed % 20) * 500
+  const vestedBalance = Math.round(totalBalance * 0.85)
+  return { totalBalance, vestedBalance }
+}
+
+/**
  * Drives the pre-/post-enrollment Dashboard split: a participant with any
  * row here has "enrolled" state and sees the My Plans dashboard instead of
  * the plan picker. No hardcoded enrolled/not-enrolled flag anywhere else —
@@ -58,4 +71,23 @@ export async function fetchEnrollments(participantId: string): Promise<Enrollmen
     .order('created_at', { ascending: false })
   if (error) throw error
   return data ?? []
+}
+
+/** Most recent enrollment row for a given plan_id, or null if never enrolled. */
+export async function fetchEnrollmentByPlanId(participantId: string, planId: string): Promise<Enrollment | null> {
+  const { data, error } = await supabase
+    .from('enrollments')
+    .select('*')
+    .eq('participant_id', participantId)
+    .eq('plan_id', planId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (error) throw error
+  return data
+}
+
+export async function setEnrollmentStatus(id: string, status: 'enrolled' | 'opted_out') {
+  const { error } = await supabase.from('enrollments').update({ status, updated_at: new Date().toISOString() }).eq('id', id)
+  if (error) throw error
 }

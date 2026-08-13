@@ -6,7 +6,8 @@ import { ToastProvider } from './ui-kit/lib/ToastContext'
 import ProtectedRoute from './portal-app/lib/ProtectedRoute'
 import Login from './portal-app/screens/Login'
 import Dashboard from './portal-app/screens/Dashboard'
-import MyPlans from './portal-app/screens/MyPlans'
+import EnrollmentHub from './portal-app/screens/enrollment/EnrollmentHub'
+import ManagePlan from './portal-app/screens/enrollment/ManagePlan'
 import Questionnaire from './portal-app/screens/enrollment/Questionnaire'
 import PlanEnrollment from './portal-app/screens/enrollment/PlanEnrollment'
 import Statements from './portal-app/screens/Statements'
@@ -37,8 +38,10 @@ function AnimatedRoutes() {
 
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/my-plans" element={<MyPlans />} />
-            <Route path="/enrollment" element={<Questionnaire />} />
+            <Route path="/enrollment" element={<EnrollmentHub />} />
+            <Route path="/enrollment/questionnaire" element={<Questionnaire />} />
+            <Route path="/enrollment/manage-plan" element={<ManagePlan />} />
+            <Route path="/my-plans" element={<Navigate to="/enrollment" replace />} />
             <Route path="/enroll" element={<PlanEnrollment />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/transactions" element={<TransactionsHub />} />

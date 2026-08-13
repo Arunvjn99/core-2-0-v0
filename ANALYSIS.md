@@ -190,15 +190,13 @@ the public login screen and Figma screenshots could be cross-checked).
         version should be diffed against Figma's exact card styling once
         more (button sizing, badge placement) — not re-screenshotted this
         round.
-- [ ] **Profile — full frame-by-frame audit.** Round 2 built Personal
-      Details / Employment / Beneficiaries as tabs based on 4 node IDs
-      found in a keyword search of canvas metadata, not an exhaustive
-      walk of every Profile-related frame. Given the file has ~362
-      top-level frames with heavy duplication, a full audit needs a
-      dedicated pass: enumerate every frame under the Profile/Account
-      cluster, screenshot each, and check it against what's built,
-      including states (empty/filled/editing) and the "Edit Personal
-      Details" as a distinct screen vs. today's inline edit-in-place.
+- [x] **Profile — full audit** — superseded by round 4's live-demo
+      walkthrough (more reliable than the duplicate-heavy Figma canvas):
+      confirmed all 5 real sub-screens and built Contact Details, SSN,
+      Marital status, Bank Details, and the Employment Info/Classification
+      split. Still open: "Edit Personal Details" as its own distinct step
+      vs. today's inline edit-in-place (functionally equivalent, not
+      visually diffed against the live app's dedicated edit screen).
 - [ ] **Transactions — still incomplete per the round-2 checklist's own
       carried-forward list**: Loans list/landing screen (multiple loans,
       not just the one Loan Summary detail view), Transfer Request
@@ -214,11 +212,10 @@ the public login screen and Figma screenshots could be cross-checked).
       and convert each to `SlideOver`, re-verified against the live demo
       interaction (not just a static screenshot) since slide direction
       and trigger behavior don't show up in stills.
-- [ ] Live demo (https://participant-demo.coreretirementsolutions.com)
-      could only be checked pre-login this round — no credentials were
-      available. If credentials can be shared, re-verify Dashboard,
-      Profile, Transactions, and Enrollment interaction patterns against
-      it directly rather than relying solely on Figma stills.
+- [x] Live demo login credentials were provided in round 4 — Dashboard,
+      Profile, and Enrollment were re-verified directly against it (see
+      "Round 4" section below). Transactions/Documents/Investment
+      Portfolio still need the same treatment.
 
 ---
 
@@ -318,45 +315,74 @@ Two distinct overlay patterns observed live:
    "Compound your savings" etc.) were not re-checked this round — still
    open per Round 3's note.
 
-### Updated checklist (supersedes/extends Round 3's "still open" list)
+### Also checked this round: Figma "mobile App" page (2046:1447)
 
-- [ ] **Profile — add Contact Details section** to Personal Details:
-      Email, Primary/Secondary phone (with country-code select), Address
-      line 1-3, City, Country, State, Zip. Real, well-scoped, no Figma
-      hunting needed — field list confirmed live.
-- [ ] **Profile — add SSN field** (masked `XXX-XX-####` + eye-icon
-      toggle) and **Marital status** to Basic Details.
-- [ ] **Profile — build Bank Details tab** (Yes/No "Set bank
-      information" toggle, revealing account fields when Yes).
-- [ ] **Profile — split Employment into two real screens**: Employment
-      Information (payroll frequency, date of hire, QDRO, ownership %,
-      officer/HCE/key-employee/insider flags, rehire details) and
-      Employee Classification (location/division/department/paycode,
-      classification type/code/name/dates, classification history) —
-      today it's one flat "Employment" tab with 4 fields.
-- [ ] **Enrollment nav item should open a plan browser**, not the risk
-      questionnaire directly — All/Enrolled/Eligible filtered card list,
-      enrolled plans get a "Manage" card (dark gradient) routing to a
-      single-plan management view, eligible plans get "Enroll" (white
-      card) routing to the wizard. The risk questionnaire needs a home
-      elsewhere in the flow (e.g. reachable from "Edit Preferences" as
-      today, or as a first-time-only step) rather than being what
-      "Enrollment" in the nav means.
-- [ ] **Rework `/my-plans` into a per-plan "Manage Plan" screen**
-      matching the real one (balance pair, Contribution/Investment
-      Election, Auto-Features with ADI table, Opt-Out Plan/Edit actions)
-      instead of a stacked all-history list.
+Looked for Employment/Classification/Bank/Manage-Plan frames there since
+the canonical "core 2.0" page's ~362 frames are too duplicate-heavy to
+search by name reliably. Found `Enroll Wizard walkthrough` (2226:3529)
+and a few related frames — but a screenshot confirmed this is a
+**different, unrelated prototype** (different visual language, "Hi
+Arun" branding, AI-recommendation framing) rather than a mobile variant
+of the canonical Participants Portal Playground flow. Disregarded; the
+live demo remains the authoritative source for this round's build.
+
+### Round 4 build — completed
+
+- [x] Enrollment nav now opens a real plan browser (`EnrollmentHub.tsx`
+      at `/enrollment`) — All/Enrolled/Eligible filter chips, dark
+      gradient card + Manage for enrolled plans, white card + Enroll for
+      eligible ones. Verified live, matches the real screen's layout.
+- [x] Risk questionnaire moved to `/enrollment/questionnaire`, reachable
+      from the Dashboard risk widget's Take Questionnaire/Edit
+      Preferences buttons.
+- [x] New `ManagePlan.tsx` at `/enrollment/manage-plan?planId=…` — real
+      per-plan drill-in (balance pair, Contribution Election, Investment
+      Election + Breakdown toggle, Auto-Features w/ ADI table, Opt-Out
+      Plan / Edit actions backed by a real `setEnrollmentStatus` write).
+      Replaces `/my-plans` (now a redirect to `/enrollment`).
+- [x] Profile split into 5 real tabs: Personal Details, Bank Details,
+      **Employment Info** (payroll frequency, date of hire, QDRO,
+      ownership %, officer/HCE/key-employee/insider flags, rehire
+      details) and **Classification** (location/division/department/
+      paycode, classification type/code/name/dates, classification
+      history) as two distinct screens — matches the live app field for
+      field. New `core2.participants` columns for all of it.
+  - Note: filled from a `git mv`-free split of the old flat Employment
+    tab; all fields are read-only for now (matches the real app's
+    read-only presentation of HR/payroll-sourced data).
+- [x] Fixed the pre-existing `DEMO_PLANS` bug where two demo plans
+      shared the same `plan_id` (124542) — caused false "already
+      enrolled" collisions; moved the catalog to a shared `lib/plans.ts`
+      so Dashboard and Enrollment hub can't drift from each other again.
+- [x] Full clean build + live verification on a fresh dev-server
+      restart: Dashboard → Enrollment hub → Manage Plan → Profile's new
+      tabs, all screenshotted and confirmed against the live reference.
+
+### Still open after round 4
+
 - [ ] Re-check whether Dashboard's Recent Transactions / Learning tile /
       Rate of Return chart should stay — they don't appear in the real
       live dashboard we now have confirmation of; either they're
       demo-data-gated in the real app or Figma's static frame oversells
-      what's shipped. Lowest priority of this batch since it's a "maybe
-      remove" not a "definitely missing" item.
-- [ ] Minor copy fix: "Show Ineligible Plans" (title case) to match live
-      exactly.
+      what's shipped. Lowest priority — "maybe remove," not "definitely
+      missing."
+- [ ] Employment Info / Classification fields are read-only display only
+      (matches the live app for now) — no edit UI yet if that turns out
+      to be needed; also no data seeded for these new columns, so every
+      field currently reads "—" for the demo user until seeded.
 - [ ] Transaction and Documents screens still unexplored against the
-      live demo (this round's transaction screen didn't finish loading);
-      Investment Portfolio also unexplored this round.
+      live demo (round 4's transaction screen didn't finish loading);
+      Investment Portfolio also unexplored.
+- [ ] Login page responsive layout (fixed px sizing) — carried from
+      round 3, not touched this round.
+- [ ] Enrollment wizard step panels (e.g. Auto Increase's "Compound your
+      savings") — slide-over vs. modal/inline still unconfirmed at
+      desktop width; carried from round 3.
+- [ ] `PlanEnrollment.tsx`'s wizard always writes to the same hardcoded
+      `PLAN` regardless of which Enrollment-hub/Dashboard card triggered
+      it — pre-existing simplification, now more visible since the hub
+      shows multiple distinct eligible plans. Needs the clicked plan's
+      id/name threaded through to the wizard instead.
 
 ---
 

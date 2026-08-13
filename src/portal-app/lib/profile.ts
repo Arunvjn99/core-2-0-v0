@@ -29,10 +29,32 @@ export type ParticipantProfile = {
   bank_name: string | null
   bank_account_number: string | null
   bank_routing_number: string | null
+  // Employment Information (distinct from Employee Classification below —
+  // confirmed as two separate real screens, round 4)
+  date_of_hire: string | null
+  qdro_pending: boolean
+  ownership_pct: number | null
+  is_family_of_owner: boolean
+  is_officer: boolean
+  is_hce: boolean
+  is_key_employee: boolean
+  is_insider: boolean
+  most_recent_rehire_date: string | null
+  most_recent_term_date: string | null
+  // Employee Classification
+  location: string | null
+  division: string | null
+  department: string | null
+  paycode: string | null
+  classification_type: string | null
+  classification_code: string | null
+  classification_name: string | null
+  classification_start_date: string | null
+  classification_end_date: string | null
 }
 
 const PROFILE_COLUMNS =
-  'first_name, middle_name, last_name, gender, date_of_birth, employee_id, employer_name, status, payroll_frequency, employee_classification, ssn, marital_status, email, phone_primary, phone_secondary, address_line1, address_line2, address_line3, city, country, state, zip_code, has_bank_details, bank_name, bank_account_number, bank_routing_number'
+  'first_name, middle_name, last_name, gender, date_of_birth, employee_id, employer_name, status, payroll_frequency, employee_classification, ssn, marital_status, email, phone_primary, phone_secondary, address_line1, address_line2, address_line3, city, country, state, zip_code, has_bank_details, bank_name, bank_account_number, bank_routing_number, date_of_hire, qdro_pending, ownership_pct, is_family_of_owner, is_officer, is_hce, is_key_employee, is_insider, most_recent_rehire_date, most_recent_term_date, location, division, department, paycode, classification_type, classification_code, classification_name, classification_start_date, classification_end_date'
 
 export type Beneficiary = {
   id: string
