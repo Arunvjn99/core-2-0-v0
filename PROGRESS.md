@@ -39,6 +39,31 @@ A running record of what's been built, fixed, and decided in this project. Newes
 
 ---
 
+## Session: Transactions — Loans list + Transfer Request Summary
+
+Closed the two remaining Transactions gaps carried since round 2:
+
+- **Loans list**: `TransactionsHub`'s Loans filter now shows two demo
+  loans (Personal, Housing) instead of one hardcoded loan, each routing
+  to `LoanSummary` with a `?loan=` param so the detail screen's title,
+  amount, loan ID, and outstanding balance genuinely differ per loan
+  instead of always describing the same "Personal loan."
+- **Transfer Request Summary + Transaction ID tracking**: new
+  `TransferSummary.tsx` screen — submitting `NewTransferRequest` now
+  lands here instead of just toasting and redirecting to the hub. Shows
+  the transaction ID, live status, submitted details, and per-source
+  breakdown, read back from the real database row. Verified live with a
+  full real submission via a disposable scratch test account.
+- Note for future sessions: a stretch of apparent 409 errors during this
+  verification was a corrupted Supabase auth session from running two
+  tabs on the same scratch account concurrently (refresh-token race),
+  not a real app bug — logged in `ANALYSIS.md` so it isn't mistaken for
+  a regression.
+- Still open: New Rollover Request wizard (deliberately deferred as the
+  next flow after Transfer, same as it's been since round 2).
+
+---
+
 ## Session: Enrollment wizard slide-over conversion + Dashboard widget cleanup
 
 - **Auto Increase's "Compound your savings" panel converted from a

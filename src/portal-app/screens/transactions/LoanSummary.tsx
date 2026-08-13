@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { AppShell } from '../../../ui-kit/patterns/AppShell'
 import { IconChevronDown, IconDownload } from '../../../ui-kit/icons'
 
@@ -8,7 +8,17 @@ import { IconChevronDown, IconDownload } from '../../../ui-kit/icons'
  * cluster, but is actually a loan/transaction detail screen — "Transaction"
  * is highlighted in its sidebar). Demo installment data below; real values
  * come from a loan-servicing backend that doesn't exist yet.
+ *
+ * Round 6: TransactionsHub's Loans list now shows two loans (Personal /
+ * Housing), each passing `?loan=personal|housing` here so the detail
+ * view actually differs per loan instead of always describing the same
+ * one.
  */
+const LOANS = {
+  personal: { title: 'Personal loan', amount: '$10,000.00', loanId: '1234', outstanding: '$2,000.00' },
+  housing: { title: 'Housing loan', amount: '$25,000.00', loanId: '5678', outstanding: '$18,000.00' },
+}
+
 const INSTALLMENTS = [
   { n: 1, date: '01/01/2025', repayment: 1000, principal: 990, interest: 10, outstanding: 5000, method: 'Payroll deduction' },
   { n: 2, date: '03/01/2025', repayment: 1000, principal: 990, interest: 10, outstanding: 4000, method: 'Payroll deduction' },
@@ -23,6 +33,8 @@ const money = (n: number) => `$${n.toLocaleString('en-US', { minimumFractionDigi
 
 export default function LoanSummary() {
   const navigate = useNavigate()
+  const [params] = useSearchParams()
+  const loan = LOANS[(params.get('loan') as keyof typeof LOANS) ?? 'personal'] ?? LOANS.personal
   const [tab, setTab] = useState<(typeof TABS)[number]>('Repayment Schedule')
   const paid = 5000
   const total = 6000
@@ -35,7 +47,7 @@ export default function LoanSummary() {
             <button onClick={() => navigate('/transactions')} className="text-[14px] font-semibold text-core-info">
               ‹ Back
             </button>
-            <h1 className="text-[22px] font-semibold text-core-text">Loan summary</h1>
+            <h1 className="text-[22px] font-semibold text-core-text">{loan.title} summary</h1>
           </div>
           <button className="flex items-center gap-2 rounded-[4px] border border-core-info px-4 py-2 text-[14px] font-semibold text-core-info">
             Actions <IconChevronDown className="size-3" />
@@ -65,17 +77,17 @@ export default function LoanSummary() {
             <div className="flex flex-wrap items-center gap-x-8 gap-y-2">
               <div>
                 <div className="flex items-center gap-2">
-                  <p className="text-[16px] font-semibold text-core-text">$10,000.00</p>
+                  <p className="text-[16px] font-semibold text-core-text">{loan.amount}</p>
                   <span className="rounded-full bg-core-success-bg px-2 py-0.5 text-[11px] font-semibold uppercase text-core-success">
                     Active
                   </span>
                 </div>
-                <p className="text-[13px] text-core-text-muted">Personal loan</p>
+                <p className="text-[13px] text-core-text-muted">{loan.title}</p>
               </div>
-              <Stat label="Loan ID" value="1234" />
+              <Stat label="Loan ID" value={loan.loanId} />
               <Stat label="Requested by" value="Admin" />
               <Stat label="Next repayment date" value="20 March, 2026" />
-              <Stat label="Outstanding Balance" value="$2,000.00" />
+              <Stat label="Outstanding Balance" value={loan.outstanding} />
             </div>
             <div className="flex flex-col gap-1 sm:w-48">
               <p className="text-right text-[12px] text-core-text-muted">

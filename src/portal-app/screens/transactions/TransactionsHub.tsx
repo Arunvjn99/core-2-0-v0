@@ -12,14 +12,17 @@ import { useAuth } from '../../lib/AuthContext'
  */
 const FILTERS = ['All', 'Loans', 'Withdrawal', 'Distribution', 'Transfer', 'Rebalance', 'Rollover', 'Roth Conversion'] as const
 
-const DEMO_LOAN = {
-  id: 'loan-1234',
-  type: 'Loans',
-  title: 'Personal loan',
-  amount: '$10,000.00',
-  status: 'Active',
-  date: '20 Mar 2026',
-}
+/**
+ * Round 6: the round-2 checklist called for a "Loans list (Housing loan /
+ * Personal loan chips)" screen distinct from the single Loan Summary
+ * detail view — this hub's Loans filter now shows both, each navigating
+ * to LoanSummary with a `?loan=` id so the detail screen can distinguish
+ * them.
+ */
+const DEMO_LOANS = [
+  { id: 'loan-1234', loanKey: 'personal', type: 'Loans', title: 'Personal loan', amount: '$10,000.00', status: 'Active', date: '20 Mar 2026' },
+  { id: 'loan-5678', loanKey: 'housing', type: 'Loans', title: 'Housing loan', amount: '$25,000.00', status: 'Active', date: '02 Jan 2026' },
+]
 
 type Req = {
   id: string
@@ -61,7 +64,7 @@ export default function TransactionsHub() {
   }, [session])
 
   const items = [
-    ...(filter === 'All' || filter === 'Loans' ? [DEMO_LOAN] : []),
+    ...(filter === 'All' || filter === 'Loans' ? DEMO_LOANS : []),
     ...requests
       .filter((r) => filter === 'All' || TYPE_LABEL[r.request_type] === filter)
       .map((r) => ({
@@ -117,7 +120,11 @@ export default function TransactionsHub() {
             {items.map((item) => (
               <button
                 key={item.id}
-                onClick={() => item.id === 'loan-1234' && navigate('/transactions/loan')}
+                onClick={() =>
+                  'loanKey' in item && item.loanKey
+                    ? navigate(`/transactions/loan?loan=${item.loanKey}`)
+                    : undefined
+                }
                 className="flex items-center justify-between rounded-core-md border border-core-border bg-core-surface p-4 text-left shadow-core-sm hover:border-core-info"
               >
                 <div>

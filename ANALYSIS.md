@@ -108,13 +108,15 @@ this pass and fix any drift found (spacing, copy, colors).
 
 ## Still open (carried forward)
 
-- [ ] Loans list (Housing loan / Personal loan chips) screen — only the
-      Loan Summary *detail* view is built; there's no list/landing view
-      for choosing between multiple loans yet (TransactionsHub covers a
-      generic list, not this specific Figma pattern)
-- [ ] Transfer Request Summary + Transaction ID tracking screen (post
-      New Transfer Request submission — currently just toasts + redirects
-      to the hub instead of showing a dedicated summary screen)
+- [x] Loans list — resolved in round 6: TransactionsHub's Loans filter
+      now shows both a Personal loan and a Housing loan card, each
+      routing to LoanSummary with `?loan=` so the detail view actually
+      differs per loan.
+- [x] Transfer Request Summary + Transaction ID tracking screen —
+      resolved in round 6: `TransferSummary.tsx` at
+      `/transactions/transfer-summary?ref=`, showing the transaction ID,
+      status, submitted details, and per-source breakdown. Verified live
+      with a real submission end-to-end.
 - [ ] Edit Personal Details as its own distinct step — current build
       uses inline edit-in-place on the same screen rather than Figma's
       separate "Edit Personal Details" screen (2893:12743); functionally
@@ -172,15 +174,8 @@ the public login screen and Figma screenshots could be cross-checked).
 
 ### Still open — real, scoped, and next in line
 
-- [ ] **Login page responsive layout** — current implementation
-      (`Login.tsx`) uses Figma's literal fixed pixel values (638px brand
-      panel, 474/499px form max-widths, 855px panel height, 82px/124px
-      gaps) almost verbatim. This reproduces the design at one viewport
-      size but doesn't scale down cleanly on narrower desktop widths or
-      between breakpoints. Needs: fluid widths (`clamp()`/`%`/`fr` instead
-      of literal px), a defined tablet breakpoint (not just the current
-      binary lg: show/hide of the brand panel), and font-size scaling for
-      the 52px hero text and 31px "Login" heading.
+- [x] **Login page responsive layout** — fixed in round 5, `clamp()`
+      throughout `Login.tsx`.
 - [ ] **Dashboard — Rate of Return chart** (Figma node `2893:57381`, left
       column, "Rate of Return +101.20%" line chart with 1M/6M/1Y/YTD
       toggle) — not built this round in the interest of shipping the
@@ -197,21 +192,13 @@ the public login screen and Figma screenshots could be cross-checked).
       split. Still open: "Edit Personal Details" as its own distinct step
       vs. today's inline edit-in-place (functionally equivalent, not
       visually diffed against the live app's dedicated edit screen).
-- [ ] **Transactions — still incomplete per the round-2 checklist's own
-      carried-forward list**: Loans list/landing screen (multiple loans,
-      not just the one Loan Summary detail view), Transfer Request
-      Summary + Transaction ID tracking screen (post-submit — currently
-      just a toast + redirect), New Rollover Request wizard.
-- [ ] **Enrollment flow — slide-over, not modal/inline.** The live demo
-      and Figma prototype show per-step option panels (e.g. Auto
-      Increase's "Compound your savings" configuration) opening as a
-      right-edge slide-over (matches the pattern already built once for
-      the Investments fund picker, `ui-kit/primitives/SlideOver.tsx`) —
-      today's `PlanEnrollment.tsx` renders these inline/as a centered
-      modal instead. Needs: identify every such panel across all 4 steps
-      and convert each to `SlideOver`, re-verified against the live demo
-      interaction (not just a static screenshot) since slide direction
-      and trigger behavior don't show up in stills.
+- [x] Loans list and Transfer Request Summary — resolved round 6 (see
+      above). Still open: New Rollover Request wizard (deliberately
+      deferred since round 2 — Transfer Request was built as the
+      template flow first).
+- [x] **Enrollment flow — slide-over, not modal/inline.** Fixed in round
+      6 — Auto Increase's "Compound your savings" panel (the only such
+      panel in the wizard) now uses `SlideOver`, verified live.
 - [x] Live demo login credentials were provided in round 4 — Dashboard,
       Profile, and Enrollment were re-verified directly against it (see
       "Round 4" section below). Transactions/Documents/Investment
@@ -405,8 +392,30 @@ live demo remains the authoritative source for this round's build.
 - [x] Full clean build + live re-verification (fresh scratch account,
       dashboard renders correctly with no errors).
 
-### Still open after round 6
+### Round 6 addendum — Transactions gaps closed
 
+- [x] **Loans list**: `TransactionsHub`'s Loans filter now shows two
+      demo loans (Personal, Housing) instead of one, each routing to
+      `LoanSummary` with `?loan=personal|housing` so the detail screen's
+      title/amount/loan ID/outstanding balance actually differ per loan.
+- [x] **Transfer Request Summary + Transaction ID tracking**: new
+      `TransferSummary.tsx` (`/transactions/transfer-summary?ref=`) —
+      `NewTransferRequest` now navigates here after a successful submit
+      instead of just toasting and redirecting to the hub. Shows the
+      transaction ID, live status, submitted timestamp, investment,
+      transfer mode, total, and per-source breakdown, all read back from
+      the real `core2.transaction_requests` row. Verified live end to
+      end with a real submission via a disposable scratch account.
+- Testing note: a stretch of apparent 409s / non-submitting forms during
+  this verification turned out to be a corrupted Supabase auth session
+  caused by running two tabs on the same scratch account concurrently
+  (refresh-token race), not a real bug — resolved by closing the extra
+  tab and logging in fresh. Recorded here so it isn't mistaken for a
+  regression later.
+
+### Still open after round 6 (final)
+
+- [ ] New Rollover Request wizard (deliberately deferred since round 2)
 - [ ] Employment Info / Classification fields are read-only display only
       (matches the live app for now) — no edit UI yet if that turns out
       to be needed; also no data seeded for these new columns, so every

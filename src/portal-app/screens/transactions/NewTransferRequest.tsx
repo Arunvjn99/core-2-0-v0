@@ -44,7 +44,7 @@ export default function NewTransferRequest() {
         .single()
       if (error) throw error
       show(`Transfer request submitted — track it with #${data.transaction_ref}`)
-      navigate('/transactions')
+      navigate(`/transactions/transfer-summary?ref=${encodeURIComponent(data.transaction_ref)}`)
     } catch (e) {
       show(e instanceof Error ? e.message : 'Could not submit request', 'error')
     } finally {
