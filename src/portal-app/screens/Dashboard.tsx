@@ -147,7 +147,7 @@ export default function Dashboard() {
                 {isEnrolled ? 'Explore More Plans' : "Let's Find You the Best Plan"}
               </p>
               <label className="flex items-center gap-2 text-[16px] font-medium text-core-text">
-                Show Ineligible plans
+                Show Ineligible Plans
                 <button
                   role="switch"
                   aria-checked={showIneligible}

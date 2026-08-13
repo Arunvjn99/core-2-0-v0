@@ -11,7 +11,28 @@ export type ParticipantProfile = {
   status: string
   payroll_frequency: string | null
   employee_classification: string | null
+  // Round 4: fields confirmed against the live demo's Personal Details /
+  // Bank Details screens that we didn't have at all before.
+  ssn: string | null
+  marital_status: string | null
+  email: string | null
+  phone_primary: string | null
+  phone_secondary: string | null
+  address_line1: string | null
+  address_line2: string | null
+  address_line3: string | null
+  city: string | null
+  country: string | null
+  state: string | null
+  zip_code: string | null
+  has_bank_details: boolean
+  bank_name: string | null
+  bank_account_number: string | null
+  bank_routing_number: string | null
 }
+
+const PROFILE_COLUMNS =
+  'first_name, middle_name, last_name, gender, date_of_birth, employee_id, employer_name, status, payroll_frequency, employee_classification, ssn, marital_status, email, phone_primary, phone_secondary, address_line1, address_line2, address_line3, city, country, state, zip_code, has_bank_details, bank_name, bank_account_number, bank_routing_number'
 
 export type Beneficiary = {
   id: string
@@ -23,9 +44,7 @@ export type Beneficiary = {
 export async function fetchProfile(participantId: string): Promise<ParticipantProfile | null> {
   const { data, error } = await supabase
     .from('participants')
-    .select(
-      'first_name, middle_name, last_name, gender, date_of_birth, employee_id, employer_name, status, payroll_frequency, employee_classification',
-    )
+    .select(PROFILE_COLUMNS)
     .eq('id', participantId)
     .maybeSingle()
   if (error) throw error

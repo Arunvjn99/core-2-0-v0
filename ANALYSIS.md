@@ -222,6 +222,144 @@ the public login screen and Figma screenshots could be cross-checked).
 
 ---
 
+## Round 4 — live demo walkthrough (2026-08-13, logged in as "Michael Carter" / Galileo)
+
+User provided a logged-in session this time. Walked the real app (mobile-
+width chrome, bottom tab bar MENU/DASHBOARD/SETTINGS + a left slide-in
+"Menu" drawer) screen by screen. This is now the highest-confidence source
+we have — more reliable than Figma's duplicate-heavy canvas — and reveals
+real gaps Figma alone didn't surface.
+
+### Real navigation structure (menu drawer, confirmed live)
+
+```
+Dashboard
+Enrollment          <- NOT the risk questionnaire. A plan browser: All/
+                        Enrolled/Eligible filter chips, dark gradient card
+                        per enrolled plan ("Manage" -> per-plan summary +
+                        Opt-Out/Edit), white card per eligible plan
+                        ("Enroll" -> wizard). Our /enrollment route
+                        currently goes straight to the risk questionnaire
+                        instead — real IA mismatch, not just styling.
+Profile              <- expandable, 5 real sub-screens:
+  Personal Details      Basic Details (incl. SSN, masked+eye-toggle,
+                         Marital status) + a full Contact Details section
+                         (Email, Primary/Secondary phone w/ country code,
+                         Address lines 1-3, City, Country, State, Zip) —
+                         we have NONE of the Contact Details section today.
+  Bank Details           "Set bank information" Yes/No toggle -> account
+                         fields when Yes. We have nothing here at all.
+  Employment Information Payroll frequency, Date of hire, QDRO status,
+                         Ownership %, Family-of-owner/Officer/HCE/Key
+                         employee/Insider flags, Rehire details (most
+                         recent rehire/term dates). Ours only has Payroll
+                         Frequency + Classification as one flat tab.
+  Employee Classification Location, Division, Department, Paycode,
+                         Classification type/code/name/start-end dates,
+                         Classification History table. Entirely missing.
+  Beneficiary Details    Confirmed our empty state text matches exactly
+                         ("No beneficiary has been added" / "add
+                         beneficiary and complete your profile" / "Add
+                         Beneficiary") — no changes needed here.
+Transaction          <- separate from Documents; real screen has a plan
+                        chip tab bar + collapsible "Plan details" row;
+                        didn't finish loading in this session (likely a
+                        demo-data gap), transaction list contents unseen.
+Documents            <- not explored this round (time-boxed).
+Investment Portfolio <- not explored this round (time-boxed).
+```
+
+### Dashboard — confirmed real vs. what we built last round
+
+Real dashboard is simpler than the Figma static frame we built from:
+- Has: Hello card + View Summary, enrolled-plan name/id/balance pair +
+  View Details (routes to `/participant/enrollment/manage-plan?planId=…`,
+  a single-plan summary — see below), Explore More Plans cards (their
+  eligible-plans list showed 3 real plans, not our 1-2 demo plans),
+  Retirement Goal Simulator, Risk Level gauge.
+- Does NOT have: a Recent Transactions panel, a Learning/Financial
+  Wellness tile, or a Rate of Return chart on the dashboard itself — all
+  three of those were built last round based on the Figma static frame
+  and are not in the real shipped app. Not necessarily wrong to keep
+  (could be a demo-data-off case), but worth flagging: **the Figma frame
+  we based Round 3's post-enrollment dashboard on is richer than what's
+  actually live** — real Goal Simulator only has 3 rows (Expected
+  expense / All Income / ShortFall), not the 5 we built (Social
+  security / Other income / Plan income split out).
+- `Show Ineligible Plans` toggle uses this exact copy/casing (title
+  case, not sentence case) — ours currently reads "Show Ineligible
+  plans" (lowercase p) — trivial but easy to match exactly.
+
+### "Manage Plan" (View Details / Manage target) — real screen, differs from our /my-plans
+
+Real route: `/participant/enrollment/manage-plan?planId=<id>` — a
+**single selected plan's** management view, not a full enrollment
+history list like the `/my-plans` screen built last round. Shows: Plan
+balance / Vested balance, Contribution Election (per source), Investment
+Election with a "Breakdown" link, Auto-Features (Period of increase,
+per-source ADI / ADI Stops At table, Smart rebalance, Auto rebalance),
+and a bottom action bar with **Opt-Out Plan** / **Edit**. Our `/my-plans`
+approximates this content per-enrollment but as a stacked history list
+rather than a per-plan drill-in, and has no Opt-Out/Edit actions.
+
+### Slide-over/overlay pattern — confirmed, partially
+
+Two distinct overlay patterns observed live:
+1. **Menu (nav drawer)**: slides in from the **left** as a narrower
+   panel over a dimmed backdrop — this matches our existing mobile
+   AppShell drawer behavior already (no change needed).
+2. **Profile sub-screens (Personal Details, Bank Details, Employment
+   Information, Employee Classification)**: full-viewport-width panel
+   with a title bar (title + X close, top-right) and a **pinned bottom
+   action bar** (Cancel/Edit or just Edit). At this viewport width it's
+   indistinguishable from a full-screen route vs. a right-edge
+   slide-over — desktop-width behavior of this exact pattern is still
+   unconfirmed. The enrollment wizard's step panels (Auto Increase's
+   "Compound your savings" etc.) were not re-checked this round — still
+   open per Round 3's note.
+
+### Updated checklist (supersedes/extends Round 3's "still open" list)
+
+- [ ] **Profile — add Contact Details section** to Personal Details:
+      Email, Primary/Secondary phone (with country-code select), Address
+      line 1-3, City, Country, State, Zip. Real, well-scoped, no Figma
+      hunting needed — field list confirmed live.
+- [ ] **Profile — add SSN field** (masked `XXX-XX-####` + eye-icon
+      toggle) and **Marital status** to Basic Details.
+- [ ] **Profile — build Bank Details tab** (Yes/No "Set bank
+      information" toggle, revealing account fields when Yes).
+- [ ] **Profile — split Employment into two real screens**: Employment
+      Information (payroll frequency, date of hire, QDRO, ownership %,
+      officer/HCE/key-employee/insider flags, rehire details) and
+      Employee Classification (location/division/department/paycode,
+      classification type/code/name/dates, classification history) —
+      today it's one flat "Employment" tab with 4 fields.
+- [ ] **Enrollment nav item should open a plan browser**, not the risk
+      questionnaire directly — All/Enrolled/Eligible filtered card list,
+      enrolled plans get a "Manage" card (dark gradient) routing to a
+      single-plan management view, eligible plans get "Enroll" (white
+      card) routing to the wizard. The risk questionnaire needs a home
+      elsewhere in the flow (e.g. reachable from "Edit Preferences" as
+      today, or as a first-time-only step) rather than being what
+      "Enrollment" in the nav means.
+- [ ] **Rework `/my-plans` into a per-plan "Manage Plan" screen**
+      matching the real one (balance pair, Contribution/Investment
+      Election, Auto-Features with ADI table, Opt-Out Plan/Edit actions)
+      instead of a stacked all-history list.
+- [ ] Re-check whether Dashboard's Recent Transactions / Learning tile /
+      Rate of Return chart should stay — they don't appear in the real
+      live dashboard we now have confirmation of; either they're
+      demo-data-gated in the real app or Figma's static frame oversells
+      what's shipped. Lowest priority of this batch since it's a "maybe
+      remove" not a "definitely missing" item.
+- [ ] Minor copy fix: "Show Ineligible Plans" (title case) to match live
+      exactly.
+- [ ] Transaction and Documents screens still unexplored against the
+      live demo (this round's transaction screen didn't finish loading);
+      Investment Portfolio also unexplored this round.
+
+---
+
 ## Deliberately deferred (documented, not forgotten)
 
 - Rollover Request wizard (Transfer flow ships first as the template)

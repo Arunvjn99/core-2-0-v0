@@ -39,6 +39,41 @@ A running record of what's been built, fixed, and decided in this project. Newes
 
 ---
 
+## Session: Live-demo walkthrough (logged in) + Profile Contact Details / Bank Details
+
+User provided a logged-in session on the real live demo
+(participant-demo.coreretirementsolutions.com) this round — walked
+Dashboard, the Profile menu's 5 real sub-screens, the Enrollment nav
+item, and the "Manage Plan" screen. Full findings logged in `ANALYSIS.md`
+("Round 4"). Highlights:
+
+- Confirmed the real nav structure: "Enrollment" in the menu is a plan
+  browser (All/Enrolled/Eligible cards), not the risk questionnaire —
+  our nav currently points it at the questionnaire directly. Logged as
+  the next IA fix.
+- Confirmed Profile really has 5 sub-screens (Personal Details, **Bank
+  Details**, Employment Information, Employee Classification,
+  Beneficiary Details) — we only had 3 flattened tabs.
+- **Implemented this round**: added a full **Contact Details** section
+  (email, primary/secondary phone, address lines 1-3, city, state,
+  country, zip) and **SSN** (masked `XXX-XX-####` + eye-toggle) +
+  **Marital status** to Personal Details — all new `core2.participants`
+  columns, wired to view + edit modes. Added a brand-new **Bank
+  Details** tab (Set bank information Yes/No toggle → account fields)
+  matching the live screen exactly.
+- Confirmed our Beneficiaries empty-state copy already matches the live
+  app exactly — no change needed there.
+- Fixed a copy casing mismatch ("Show Ineligible Plans", was lowercase
+  "plans").
+- Logged, not yet built: Employment Information/Employee Classification
+  need to become two real screens (ours is still one flat tab); the
+  Enrollment nav IA fix; reworking `/my-plans` into a per-plan "Manage
+  Plan" view with Opt-Out/Edit actions instead of a stacked history
+  list; Transaction/Documents/Investment Portfolio still unexplored
+  against the live demo.
+
+---
+
 ## Session: Client-configurable header logo + real pre-/post-enrollment Dashboard flow
 
 Full re-analysis logged in `ANALYSIS.md` ("Round 3"). Tackled the two

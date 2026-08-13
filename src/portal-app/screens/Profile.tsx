@@ -5,6 +5,7 @@ import { Select } from '../../ui-kit/primitives/Select'
 import { Button } from '../../ui-kit/primitives/Button'
 import { useAuth } from '../lib/AuthContext'
 import { useToast } from '../../ui-kit/lib/ToastContext'
+import { IconEye, IconEyeOff } from '../../ui-kit/icons'
 import {
   fetchProfile,
   saveProfile,
@@ -23,7 +24,7 @@ import {
  * screen rather than separate mobile pages, since the desktop app doesn't
  * need a phone-only navigation pattern — same sections, same fields.
  */
-const TABS = ['Personal Details', 'Employment', 'Beneficiaries'] as const
+const TABS = ['Personal Details', 'Bank Details', 'Employment', 'Beneficiaries'] as const
 type Tab = (typeof TABS)[number]
 
 export default function Profile() {
@@ -52,6 +53,7 @@ export default function Profile() {
         </div>
 
         {tab === 'Personal Details' && <PersonalDetailsTab />}
+        {tab === 'Bank Details' && <BankDetailsTab />}
         {tab === 'Employment' && <EmploymentTab />}
         {tab === 'Beneficiaries' && <BeneficiariesTab />}
       </div>
@@ -67,6 +69,7 @@ function PersonalDetailsTab() {
   const [draft, setDraft] = useState<Partial<ParticipantProfile>>({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [ssnVisible, setSsnVisible] = useState(false)
 
   useEffect(() => {
     if (!session) return
@@ -127,6 +130,39 @@ function PersonalDetailsTab() {
               value={profile?.date_of_birth ? new Date(profile.date_of_birth).toLocaleDateString() : '—'}
               hint={profile?.date_of_birth ? calcAge(profile.date_of_birth) : undefined}
             />
+            <ReadField label="Marital status" value={profile?.marital_status ?? '—'} />
+            <div>
+              <p className="mb-1.5 text-[13px] font-medium text-core-text-muted">SSN</p>
+              <div className="flex items-center justify-between rounded-[6px] bg-core-surface-sunken px-3 py-2.5 text-[14px] text-core-text">
+                <span>{maskSsn(profile?.ssn, ssnVisible)}</span>
+                {profile?.ssn && (
+                  <button
+                    type="button"
+                    onClick={() => setSsnVisible((v) => !v)}
+                    className="text-core-text-muted hover:text-core-text"
+                    aria-label={ssnVisible ? 'Hide SSN' : 'Show SSN'}
+                  >
+                    {ssnVisible ? <IconEyeOff className="size-4" /> : <IconEye className="size-4" />}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-core-border pt-5">
+          <h3 className="mb-3 text-[14px] font-semibold text-core-text">Contact details</h3>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <ReadField label="Email" value={profile?.email} />
+            <ReadField label="Primary phone number" value={profile?.phone_primary} />
+            <ReadField label="Secondary phone number" value={profile?.phone_secondary} />
+            <ReadField label="Address line 1" value={profile?.address_line1} />
+            <ReadField label="Address line 2" value={profile?.address_line2} />
+            <ReadField label="Address line 3" value={profile?.address_line3} />
+            <ReadField label="City" value={profile?.city} />
+            <ReadField label="State" value={profile?.state} />
+            <ReadField label="Country" value={profile?.country} />
+            <ReadField label="Zip code" value={profile?.zip_code} />
           </div>
         </div>
 
@@ -157,7 +193,30 @@ function PersonalDetailsTab() {
           value={draft.date_of_birth ?? ''}
           onChange={(e) => setDraft({ ...draft, date_of_birth: e.target.value })}
         />
+        <Select label="Marital status" value={draft.marital_status ?? ''} onChange={(e) => setDraft({ ...draft, marital_status: e.target.value })}>
+          <option value="">Select an option</option>
+          <option>Single</option>
+          <option>Married</option>
+          <option>Divorced</option>
+          <option>Widower</option>
+        </Select>
+        <TextField label="SSN" value={draft.ssn ?? ''} onChange={(e) => setDraft({ ...draft, ssn: e.target.value })} />
       </div>
+
+      <h3 className="text-[16px] font-semibold text-core-text">Contact Details</h3>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <TextField label="Email" type="email" value={draft.email ?? ''} onChange={(e) => setDraft({ ...draft, email: e.target.value })} />
+        <TextField label="Primary phone number" value={draft.phone_primary ?? ''} onChange={(e) => setDraft({ ...draft, phone_primary: e.target.value })} />
+        <TextField label="Secondary phone number" value={draft.phone_secondary ?? ''} onChange={(e) => setDraft({ ...draft, phone_secondary: e.target.value })} />
+        <TextField label="Address line 1" value={draft.address_line1 ?? ''} onChange={(e) => setDraft({ ...draft, address_line1: e.target.value })} />
+        <TextField label="Address line 2" value={draft.address_line2 ?? ''} onChange={(e) => setDraft({ ...draft, address_line2: e.target.value })} />
+        <TextField label="Address line 3" value={draft.address_line3 ?? ''} onChange={(e) => setDraft({ ...draft, address_line3: e.target.value })} />
+        <TextField label="City" value={draft.city ?? ''} onChange={(e) => setDraft({ ...draft, city: e.target.value })} />
+        <TextField label="State" value={draft.state ?? ''} onChange={(e) => setDraft({ ...draft, state: e.target.value })} />
+        <TextField label="Country" value={draft.country ?? ''} onChange={(e) => setDraft({ ...draft, country: e.target.value })} />
+        <TextField label="Zip code" value={draft.zip_code ?? ''} onChange={(e) => setDraft({ ...draft, zip_code: e.target.value })} />
+      </div>
+
       <div className="flex gap-3">
         <Button variant="secondary" onClick={() => { setDraft(profile ?? {}); setEditing(false) }}>
           Cancel
@@ -170,12 +229,104 @@ function PersonalDetailsTab() {
   )
 }
 
+function maskSsn(ssn: string | null | undefined, visible: boolean): string {
+  if (!ssn) return '—'
+  if (visible) return ssn
+  const last4 = ssn.replace(/\D/g, '').slice(-4) || '????'
+  return `XXX-XX-${last4}`
+}
+
 function ReadField({ label, value, hint }: { label: string; value?: string | null; hint?: string }) {
   return (
     <div>
       <p className="mb-1.5 text-[13px] font-medium text-core-text-muted">{label}</p>
       <div className="rounded-[6px] bg-core-surface-sunken px-3 py-2.5 text-[14px] text-core-text">{value || '—'}</div>
       {hint && <p className="mt-1 text-[12px] text-core-text-muted">{hint}</p>}
+    </div>
+  )
+}
+
+/**
+ * Confirmed live (round 4): a "Set bank information" Yes/No toggle that
+ * reveals account fields when Yes — we had nothing here before.
+ */
+function BankDetailsTab() {
+  const { session } = useAuth()
+  const { show } = useToast()
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [hasBank, setHasBank] = useState(false)
+  const [draft, setDraft] = useState<Partial<ParticipantProfile>>({})
+
+  useEffect(() => {
+    if (!session) return
+    fetchProfile(session.user.id).then((p) => {
+      setHasBank(p?.has_bank_details ?? false)
+      setDraft(p ?? {})
+      setLoading(false)
+    })
+  }, [session])
+
+  async function handleSave() {
+    if (!session) return
+    setSaving(true)
+    try {
+      await saveProfile(session.user.id, { ...draft, has_bank_details: hasBank })
+      show('Bank details saved')
+    } catch (e) {
+      show(e instanceof Error ? e.message : 'Could not save', 'error')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) return <p className="text-core-text-muted">Loading…</p>
+
+  return (
+    <div className="flex flex-col gap-5 rounded-core-md bg-core-surface p-6 shadow-core-sm">
+      <h3 className="text-[16px] font-semibold text-core-text">Bank Details</h3>
+      <div>
+        <p className="mb-2 text-[14px] font-medium text-core-text">Set bank information</p>
+        <div className="flex flex-col gap-2">
+          {[
+            { label: 'Yes', value: true },
+            { label: 'No', value: false },
+          ].map((opt) => (
+            <label key={opt.label} className="flex items-center gap-2 text-[14px] text-core-text">
+              <input
+                type="radio"
+                name="has-bank"
+                checked={hasBank === opt.value}
+                onChange={() => setHasBank(opt.value)}
+                className="size-4 accent-[var(--core-color-info)]"
+              />
+              {opt.label}
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {hasBank && (
+        <div className="grid gap-4 border-t border-core-border pt-4 sm:grid-cols-2">
+          <TextField label="Bank name" value={draft.bank_name ?? ''} onChange={(e) => setDraft({ ...draft, bank_name: e.target.value })} />
+          <TextField
+            label="Account number"
+            value={draft.bank_account_number ?? ''}
+            onChange={(e) => setDraft({ ...draft, bank_account_number: e.target.value })}
+          />
+          <TextField
+            label="Routing number"
+            value={draft.bank_routing_number ?? ''}
+            onChange={(e) => setDraft({ ...draft, bank_routing_number: e.target.value })}
+          />
+        </div>
+      )}
+
+      <div>
+        <Button variant="cta" loading={saving} onClick={handleSave}>
+          Edit
+        </Button>
+      </div>
     </div>
   )
 }
