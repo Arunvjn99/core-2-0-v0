@@ -39,6 +39,20 @@ A running record of what's been built, fixed, and decided in this project. Newes
 
 ---
 
+## Session: Set the Galileo demo client's header logo
+
+The client-configurable logo infrastructure (light/dark, admin Theming
+page) was built earlier but no client had ever actually set one, so the
+header always fell back to the default CORE wordmark. Set a real logo
+for the "Galileo (Demo)" client — a droplet mark + wordmark matching the
+live reference app's branding — for both light and dark variants (data
+URIs, no external hosting needed). Verified live: header shows the
+Galileo logo correctly in both light and dark theme, readable in each
+(dark navy text on white / light text on dark). No code changes — this
+was a data-only change exercising the existing admin logo pipeline.
+
+---
+
 ## Session: New Rollover Request wizard — Transactions checklist complete
 
 Built the last deferred Transactions flow:
