@@ -103,8 +103,10 @@ this pass and fix any drift found (spacing, copy, colors).
       plain CSS `@keyframes` fade (`.core2-step-fade` in `index.css`)
 - [ ] Re-screenshot Contribution Election step specifically, diff against
       current build (Review is done; Contribution Election still
-      unverified this pass)
-- [ ] Commit + push (Netlify auto-deploys from `main`)
+      unverified against a fresh Figma screenshot — low priority, the
+      live-demo walkthrough in round 4 didn't surface a mismatch)
+- [x] Commit + push — done after every batch this session; Netlify
+      auto-deploys from `main`.
 
 ## Still open (carried forward)
 
@@ -176,15 +178,15 @@ the public login screen and Figma screenshots could be cross-checked).
 
 - [x] **Login page responsive layout** — fixed in round 5, `clamp()`
       throughout `Login.tsx`.
-- [ ] **Dashboard — Rate of Return chart** (Figma node `2893:57381`, left
-      column, "Rate of Return +101.20%" line chart with 1M/6M/1Y/YTD
-      toggle) — not built this round in the interest of shipping the
-      pre-/post branching first; currently omitted entirely rather than
-      faked with placeholder data.
-  - [ ] Dashboard's "Explore More Plans" PlanCard row and the pre-enrollment
-        version should be diffed against Figma's exact card styling once
-        more (button sizing, badge placement) — not re-screenshotted this
-        round.
+- [x] **Dashboard — Rate of Return chart** — resolved (as "no action
+      needed") in round 6: confirmed via the live demo that the real
+      shipped dashboard doesn't have this chart either, so Figma's
+      static frame oversold what's actually there. Not built, and not
+      missing anything real.
+- [ ] Dashboard's "Explore More Plans" PlanCard row and the pre-enrollment
+      version should be diffed against Figma's exact card styling once
+      more (button sizing, badge placement) — low priority, not
+      re-screenshotted since round 2.
 - [x] **Profile — full audit** — superseded by round 4's live-demo
       walkthrough (more reliable than the duplicate-heavy Figma canvas):
       confirmed all 5 real sub-screens and built Contact Details, SSN,
@@ -442,9 +444,10 @@ live demo remains the authoritative source for this round's build.
       against the live demo (both stuck loading on that account, round
       5) — still built from Figma/earlier-session assumptions only,
       unverified.
-- [ ] Rate of Return chart was never built (omitted, not removed) —
-      still absent from the real live dashboard too, so no action
-      needed unless that changes.
+- [ ] Edit Personal Details as its own distinct step, Dashboard's
+      "Explore More Plans" card styling re-diff, Contribution Election
+      re-screenshot — all low-priority cosmetic verification items, not
+      confirmed gaps.
 
 ---
 
