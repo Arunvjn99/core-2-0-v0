@@ -16,6 +16,8 @@ import TransactionsHub from './portal-app/screens/transactions/TransactionsHub'
 import LoanSummary from './portal-app/screens/transactions/LoanSummary'
 import NewTransferRequest from './portal-app/screens/transactions/NewTransferRequest'
 import TransferSummary from './portal-app/screens/transactions/TransferSummary'
+import NewRolloverRequest from './portal-app/screens/transactions/NewRolloverRequest'
+import RolloverSummary from './portal-app/screens/transactions/RolloverSummary'
 import Profile from './portal-app/screens/Profile'
 import AdminClients from './admin-app/screens/Clients'
 import AdminThemeEditor from './admin-app/screens/ThemeEditor'
@@ -49,6 +51,8 @@ function AnimatedRoutes() {
             <Route path="/transactions/loan" element={<LoanSummary />} />
             <Route path="/transactions/new-transfer" element={<NewTransferRequest />} />
             <Route path="/transactions/transfer-summary" element={<TransferSummary />} />
+            <Route path="/transactions/new-rollover" element={<NewRolloverRequest />} />
+            <Route path="/transactions/rollover-summary" element={<RolloverSummary />} />
             <Route path="/statements" element={<Statements />} />
             <Route path="/investments" element={<Investments />} />
 

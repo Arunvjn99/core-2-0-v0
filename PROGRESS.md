@@ -39,6 +39,29 @@ A running record of what's been built, fixed, and decided in this project. Newes
 
 ---
 
+## Session: New Rollover Request wizard — Transactions checklist complete
+
+Built the last deferred Transactions flow:
+
+- **`NewRolloverRequest.tsx`** (`/transactions/new-rollover`) and
+  **`RolloverSummary.tsx`** (`/transactions/rollover-summary?ref=`) —
+  same structural pattern as New Transfer Request (per-source
+  breakdown, real Supabase write, dedicated summary screen), with the
+  fields a rollover actually needs: prior institution/employer, account
+  type, prior account number, and per-source rollover amounts. No
+  live-demo/Figma reference existed for this exact screen, so it's
+  built from the established pattern rather than a specific screenshot.
+- `TransactionsHub`'s "+ New Request" button is now filter-aware —
+  opens New Rollover Request when the Rollover chip is selected, New
+  Transfer Request otherwise.
+- Verified live end-to-end via a disposable scratch account: filled the
+  form, submitted, landed on the summary screen showing the real
+  transaction ID and saved details read back from the database.
+- This closes every item on the Transactions checklist that's been
+  carried since round 2 — full history in `ANALYSIS.md`.
+
+---
+
 ## Session: Transactions — Loans list + Transfer Request Summary
 
 Closed the two remaining Transactions gaps carried since round 2:

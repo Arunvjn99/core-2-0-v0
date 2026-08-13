@@ -87,7 +87,7 @@ export default function TransactionsHub() {
             <p className="text-[15px] text-core-text-muted">Loans, transfers, rollovers, and other plan requests</p>
           </div>
           <button
-            onClick={() => navigate('/transactions/new-transfer')}
+            onClick={() => navigate(filter === 'Rollover' ? '/transactions/new-rollover' : '/transactions/new-transfer')}
             className="shrink-0 rounded-core-sm px-4 py-2.5 text-[14px] font-semibold text-white"
             style={{ backgroundImage: 'linear-gradient(90deg, var(--core-color-cta-from) 14.6%, var(--core-color-cta-to) 107.38%)' }}
           >

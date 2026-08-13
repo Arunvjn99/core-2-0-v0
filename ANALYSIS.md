@@ -413,9 +413,27 @@ live demo remains the authoritative source for this round's build.
   tab and logging in fresh. Recorded here so it isn't mistaken for a
   regression later.
 
-### Still open after round 6 (final)
+### Round 7 — New Rollover Request wizard (2026-08-13, same session)
 
-- [ ] New Rollover Request wizard (deliberately deferred since round 2)
+- [x] Built `NewRolloverRequest.tsx` (`/transactions/new-rollover`) and
+      `RolloverSummary.tsx` (`/transactions/rollover-summary?ref=`) —
+      the last deferred Transactions flow. No live-demo/Figma reference
+      was available for this exact screen, so it follows the same
+      structural pattern as New Transfer Request (per-source breakdown,
+      real Supabase write, dedicated summary screen) with fields a
+      rollover actually needs: prior institution, account type, prior
+      account number, and per-source rollover amounts. `TransactionsHub`'s
+      "+ New Request" button is now filter-aware — opens New Rollover
+      Request when the Rollover chip is active, New Transfer Request
+      otherwise. Verified live end-to-end with a real submission via a
+      disposable scratch account (created/deleted through the Supabase
+      auth API): form → submit → summary screen showing the real
+      transaction ID, status, and saved details.
+- This closes every item on the Transactions checklist carried since
+  round 2.
+
+### Still open after round 7 (final)
+
 - [ ] Employment Info / Classification fields are read-only display only
       (matches the live app for now) — no edit UI yet if that turns out
       to be needed; also no data seeded for these new columns, so every
@@ -432,7 +450,6 @@ live demo remains the authoritative source for this round's build.
 
 ## Deliberately deferred (documented, not forgotten)
 
-- Rollover Request wizard (Transfer flow ships first as the template)
 - Mobile-specific slide-out menu pattern (`menu-slide` node) — desktop
   drawer already covers the same nav, revisit only if a true mobile
   build is prioritized
