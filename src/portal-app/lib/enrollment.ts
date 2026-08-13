@@ -32,3 +32,30 @@ export async function submitEnrollment(participantId: string, draft: EnrollmentD
   })
   if (error) throw error
 }
+
+export type Enrollment = {
+  id: string
+  plan_name: string
+  plan_id: string
+  contribution: Contribution
+  auto_increase: AutoIncrease
+  investments: EnrollmentInvestments
+  status: string
+  created_at: string
+}
+
+/**
+ * Drives the pre-/post-enrollment Dashboard split: a participant with any
+ * row here has "enrolled" state and sees the My Plans dashboard instead of
+ * the plan picker. No hardcoded enrolled/not-enrolled flag anywhere else —
+ * this table is the single source of truth.
+ */
+export async function fetchEnrollments(participantId: string): Promise<Enrollment[]> {
+  const { data, error } = await supabase
+    .from('enrollments')
+    .select('*')
+    .eq('participant_id', participantId)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data ?? []
+}

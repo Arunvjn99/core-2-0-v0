@@ -10,9 +10,12 @@ import { useAuth } from './AuthContext'
  * nav items the admin console turned off. Falls back to "everything on,
  * default theme" if the participant has no client assigned yet.
  */
+export type ClientLogo = { light: string | null; dark: string | null }
+
 export function useClientConfig() {
   const { session } = useAuth()
   const [enabledModules, setEnabledModules] = useState<Set<string> | null>(null)
+  const [logo, setLogo] = useState<ClientLogo | null>(null)
 
   useEffect(() => {
     if (!session) return
@@ -27,17 +30,26 @@ export function useClientConfig() {
 
       const clientId = participant?.client_id
       if (!clientId) {
-        if (!cancelled) setEnabledModules(null) // null = show everything
+        if (!cancelled) {
+          setEnabledModules(null) // null = show everything
+          setLogo(null) // null = use the default CORE wordmark
+        }
         return
       }
 
       const [{ data: theme }, { data: modules }] = await Promise.all([
-        supabase.from('client_themes').select('tokens').eq('client_id', clientId).eq('is_active', true).maybeSingle(),
+        supabase
+          .from('client_themes')
+          .select('tokens, logo_url, logo_url_dark')
+          .eq('client_id', clientId)
+          .eq('is_active', true)
+          .maybeSingle(),
         supabase.from('module_config').select('module_key, enabled').eq('client_id', clientId),
       ])
 
       if (cancelled) return
       if (theme?.tokens) applyTheme(theme.tokens)
+      setLogo(theme?.logo_url ? { light: theme.logo_url, dark: theme.logo_url_dark ?? theme.logo_url } : null)
       if (modules) {
         setEnabledModules(new Set(modules.filter((m) => m.enabled).map((m) => m.module_key)))
       }
@@ -49,5 +61,5 @@ export function useClientConfig() {
     }
   }, [session])
 
-  return { enabledModules }
+  return { enabledModules, logo }
 }

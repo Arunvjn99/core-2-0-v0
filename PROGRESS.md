@@ -39,6 +39,43 @@ A running record of what's been built, fixed, and decided in this project. Newes
 
 ---
 
+## Session: Client-configurable header logo + real pre-/post-enrollment Dashboard flow
+
+Full re-analysis logged in `ANALYSIS.md` ("Round 3"). Tackled the two
+highest-leverage, fully-scoped items from user feedback:
+
+- **Header logo is now genuinely white-label**: `core2.client_themes`
+  gained a `logo_url_dark` column (alongside the pre-existing but unused
+  `logo_url`). Admin Theming page has light/dark logo URL fields with
+  live preview swatches; `useClientConfig` returns the resolved logo;
+  `AppShell` renders it via a new `ClientLogo` component that picks
+  light/dark by the active theme and falls back to the default CORE
+  wordmark when a client hasn't set one. Verified live: setting a logo in
+  the admin console repaints the participant header instantly, no
+  rebuild, confirmed against a direct DB read.
+- **Dashboard now really branches pre-/post-enrollment** — previously it
+  always rendered the plan-picker with a hardcoded `eligible` flag and no
+  concept of "already enrolled." Now `lib/enrollment.ts` exports
+  `fetchEnrollments()` reading real `core2.enrollments` rows; zero rows
+  → pre-enrollment picker (unchanged), one or more → the post-enrollment
+  layout matching Figma's `Dashboard-Post enrolled` frame (2893:57381):
+  enrolled-plan summary card with real balance figures, Recent
+  Transactions count from `core2.transaction_requests`, a Retirement Goal
+  Simulator card, and an Explore More Plans list that excludes plans
+  already enrolled by `plan_id`. Added `/my-plans` ("View summary")
+  showing full enrollment history with real saved elections. Verified
+  live against the real Supabase session (4 real enrollment rows).
+- Confirmed via `get_design_context` that the login page's gradient
+  tokens already match Figma exactly — the real gap there is fixed-px
+  layout, not colors; logged as next in `ANALYSIS.md`.
+- Remaining round-3 items (login responsiveness, Dashboard Rate-of-Return
+  chart, full Profile frame audit, Transactions gaps, enrollment
+  slide-over conversion) scoped and logged in `ANALYSIS.md` as the next
+  checklist — not attempted this round to avoid shipping half-verified
+  work across too many screens at once.
+
+---
+
 ## Session: Profile rebuild, Transactions module, Review-step rebuild, AnimatePresence bug fix
 
 Full analysis pass (logged in `ANALYSIS.md`) found Profile and Transactions

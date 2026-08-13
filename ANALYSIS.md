@@ -120,6 +120,108 @@ this pass and fix any drift found (spacing, copy, colors).
       separate "Edit Personal Details" screen (2893:12743); functionally
       equivalent, visually not diffed
 
+---
+
+## Round 3 — user-reported gaps (2026-08-13)
+
+User feedback after the round-2 batch, verbatim intent: login page doesn't
+match Figma (missing gradients, fixed-px sizing breaks on other screens),
+header logo is hardcoded (not client-configurable, no dark/light variants),
+pre-/post-enrollment Dashboard flow isn't real (no branching on actual
+enrollment state), Dashboard widgets (Goal Simulator etc.) don't match
+Figma, Profile's sub-flows aren't fully analyzed, Transactions is still
+missing pieces, and the enrollment flow's per-screen popups should be
+slide-over panels, not modals. A live reference demo
+(https://participant-demo.coreretirementsolutions.com) was provided for
+flow verification — used for login-page and post-enrollment-dashboard
+layout confirmation this round (no login credentials available, so only
+the public login screen and Figma screenshots could be cross-checked).
+
+### Done this round
+
+- [x] **Header logo, client-configurable, light/dark aware** — added
+      `logo_url_dark` column to `core2.client_themes` (alongside existing
+      `logo_url`), admin Theming page now has Logo URL (light) + Logo URL
+      (dark, optional, falls back to light) fields with live preview
+      swatches, `useClientConfig` exposes `{light, dark}`, `AppShell`
+      renders a `ClientLogo` component that swaps by resolved theme and
+      falls back to the default CORE wordmark when no client logo is set.
+      Verified live end-to-end: admin sets a logo → header repaints with
+      zero rebuild, confirmed via direct DB read + screenshot.
+- [x] **Pre-/post-enrollment Dashboard flow, no hardcode** — added
+      `fetchEnrollments()` (reads `core2.enrollments`) to
+      `lib/enrollment.ts`. `Dashboard.tsx` now branches on real enrollment
+      rows: zero enrollments → pre-enrollment "Let's Find You the Best
+      Plan" picker (unchanged); one or more → post-enrollment layout
+      matching Figma node `2893:57381` ("Dashboard-Post enrolled"): "Plans
+      you are enrolled in" summary card (real plan name/id, Total
+      Vested/Total balance, "View summary"), Recent Transactions count
+      (real `core2.transaction_requests` count), Retirement Goal
+      Simulator card, Risk Level gauge (unchanged, already real), and an
+      "Explore More Plans" section that filters out plans the participant
+      is already enrolled in by `plan_id` (was previously just a static
+      list with a hand-set `eligible` flag and no enrolled-state
+      awareness at all). New `/my-plans` screen ("View summary" target)
+      lists every enrollment with its actual saved elections. Verified
+      live: real Supabase session showing 4 real enrollment rows renders
+      the post-enrollment dashboard and full My Plans history correctly.
+- [x] Confirmed login page's gradient/token values already match Figma's
+      `get_design_context` output exactly (same two-layer linear-gradient
+      on the brand panel, same CTA gradient on the button) — the gap
+      here is layout responsiveness, not colors (see below).
+
+### Still open — real, scoped, and next in line
+
+- [ ] **Login page responsive layout** — current implementation
+      (`Login.tsx`) uses Figma's literal fixed pixel values (638px brand
+      panel, 474/499px form max-widths, 855px panel height, 82px/124px
+      gaps) almost verbatim. This reproduces the design at one viewport
+      size but doesn't scale down cleanly on narrower desktop widths or
+      between breakpoints. Needs: fluid widths (`clamp()`/`%`/`fr` instead
+      of literal px), a defined tablet breakpoint (not just the current
+      binary lg: show/hide of the brand panel), and font-size scaling for
+      the 52px hero text and 31px "Login" heading.
+- [ ] **Dashboard — Rate of Return chart** (Figma node `2893:57381`, left
+      column, "Rate of Return +101.20%" line chart with 1M/6M/1Y/YTD
+      toggle) — not built this round in the interest of shipping the
+      pre-/post branching first; currently omitted entirely rather than
+      faked with placeholder data.
+  - [ ] Dashboard's "Explore More Plans" PlanCard row and the pre-enrollment
+        version should be diffed against Figma's exact card styling once
+        more (button sizing, badge placement) — not re-screenshotted this
+        round.
+- [ ] **Profile — full frame-by-frame audit.** Round 2 built Personal
+      Details / Employment / Beneficiaries as tabs based on 4 node IDs
+      found in a keyword search of canvas metadata, not an exhaustive
+      walk of every Profile-related frame. Given the file has ~362
+      top-level frames with heavy duplication, a full audit needs a
+      dedicated pass: enumerate every frame under the Profile/Account
+      cluster, screenshot each, and check it against what's built,
+      including states (empty/filled/editing) and the "Edit Personal
+      Details" as a distinct screen vs. today's inline edit-in-place.
+- [ ] **Transactions — still incomplete per the round-2 checklist's own
+      carried-forward list**: Loans list/landing screen (multiple loans,
+      not just the one Loan Summary detail view), Transfer Request
+      Summary + Transaction ID tracking screen (post-submit — currently
+      just a toast + redirect), New Rollover Request wizard.
+- [ ] **Enrollment flow — slide-over, not modal/inline.** The live demo
+      and Figma prototype show per-step option panels (e.g. Auto
+      Increase's "Compound your savings" configuration) opening as a
+      right-edge slide-over (matches the pattern already built once for
+      the Investments fund picker, `ui-kit/primitives/SlideOver.tsx`) —
+      today's `PlanEnrollment.tsx` renders these inline/as a centered
+      modal instead. Needs: identify every such panel across all 4 steps
+      and convert each to `SlideOver`, re-verified against the live demo
+      interaction (not just a static screenshot) since slide direction
+      and trigger behavior don't show up in stills.
+- [ ] Live demo (https://participant-demo.coreretirementsolutions.com)
+      could only be checked pre-login this round — no credentials were
+      available. If credentials can be shared, re-verify Dashboard,
+      Profile, Transactions, and Enrollment interaction patterns against
+      it directly rather than relying solely on Figma stills.
+
+---
+
 ## Deliberately deferred (documented, not forgotten)
 
 - Rollover Request wizard (Transfer flow ships first as the template)

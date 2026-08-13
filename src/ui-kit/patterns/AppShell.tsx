@@ -37,10 +37,19 @@ const NAV_ITEMS = [
   { to: '/investments', label: 'Investment Portfolio', icon: IconInvestment, moduleKey: 'investments' },
 ]
 
+function ClientLogo({ logo, resolved, className }: { logo: { light: string | null; dark: string | null } | null; resolved: 'light' | 'dark'; className?: string }) {
+  const src = logo ? (resolved === 'dark' ? logo.dark ?? logo.light : logo.light) : null
+  if (src) {
+    return <img src={src} alt="" className={className} />
+  }
+  // No client logo configured yet — fall back to the default CORE wordmark.
+  return <img src={wordmark} alt="" className={className} style={resolved === 'dark' ? { filter: 'invert(1)' } : undefined} />
+}
+
 export function AppShell({ children }: { children: ReactNode }) {
   const { session, signOut } = useAuth()
   const { resolved } = useTheme()
-  const { enabledModules } = useClientConfig()
+  const { enabledModules, logo } = useClientConfig()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const name = (session?.user.user_metadata?.full_name as string | undefined) ?? session?.user.email ?? 'Participant'
   const visibleItems = enabledModules ? NAV_ITEMS.filter((i) => enabledModules.has(i.moduleKey)) : NAV_ITEMS
@@ -56,7 +65,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           >
             <IconMenu className="size-4" />
           </button>
-          <img src={wordmark} alt="" className="h-7" style={resolved === 'dark' ? { filter: 'invert(1)' } : undefined} />
+          <ClientLogo logo={logo} resolved={resolved} className="h-7 max-w-[140px] object-contain" />
         </div>
         <div className="flex h-full items-center gap-1">
           <ThemeToggle />
@@ -94,7 +103,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             />
             <nav className="relative flex h-full w-64 flex-col bg-core-surface shadow-xl">
               <div className="flex items-center justify-between border-b border-core-border p-4">
-                <img src={wordmark} alt="" className="h-7" style={resolved === 'dark' ? { filter: 'invert(1)' } : undefined} />
+                <ClientLogo logo={logo} resolved={resolved} className="h-7 max-w-[140px] object-contain" />
                 <button onClick={() => setDrawerOpen(false)} aria-label="Close menu" className="p-1 text-core-text">
                   <IconClose className="size-4" />
                 </button>

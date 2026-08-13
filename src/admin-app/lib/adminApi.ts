@@ -7,6 +7,7 @@ export type ClientTheme = {
   name: string
   tokens: Record<string, string>
   logo_url: string | null
+  logo_url_dark: string | null
   is_active: boolean
 }
 export type ModuleConfigRow = { id: string; client_id: string; module_key: string; enabled: boolean }
@@ -46,8 +47,15 @@ export async function fetchTheme(clientId: string): Promise<ClientTheme | null> 
   return data
 }
 
-export async function saveTheme(themeId: string, tokens: Record<string, string>) {
-  const { error } = await supabase.from('client_themes').update({ tokens, updated_at: new Date().toISOString() }).eq('id', themeId)
+export async function saveTheme(
+  themeId: string,
+  tokens: Record<string, string>,
+  logo?: { logo_url?: string | null; logo_url_dark?: string | null },
+) {
+  const { error } = await supabase
+    .from('client_themes')
+    .update({ tokens, ...logo, updated_at: new Date().toISOString() })
+    .eq('id', themeId)
   if (error) throw error
 }
 

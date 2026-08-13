@@ -19,6 +19,8 @@ export default function ThemeEditor() {
   const [clientId, setClientId] = useState(params.get('client') ?? '')
   const [theme, setTheme] = useState<ClientTheme | null>(null)
   const [tokens, setTokens] = useState<Record<string, string>>({})
+  const [logoUrl, setLogoUrl] = useState('')
+  const [logoUrlDark, setLogoUrlDark] = useState('')
   const [saving, setSaving] = useState(false)
   const { show } = useToast()
 
@@ -35,6 +37,8 @@ export default function ThemeEditor() {
     fetchTheme(clientId).then((t) => {
       setTheme(t)
       setTokens(t?.tokens ?? {})
+      setLogoUrl(t?.logo_url ?? '')
+      setLogoUrlDark(t?.logo_url_dark ?? '')
     })
   }, [clientId])
 
@@ -42,7 +46,10 @@ export default function ThemeEditor() {
     if (!theme) return
     setSaving(true)
     try {
-      await saveTheme(theme.id, tokens)
+      await saveTheme(theme.id, tokens, {
+        logo_url: logoUrl.trim() || null,
+        logo_url_dark: logoUrlDark.trim() || null,
+      })
       show('Theme saved — live for this client now')
     } finally {
       setSaving(false)
@@ -77,6 +84,46 @@ export default function ThemeEditor() {
         ) : (
           <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
             <div className="flex flex-col gap-4 rounded-core-md bg-core-surface p-5 shadow-core-sm">
+              <p className="text-[13px] font-semibold text-core-text-muted">Client logo</p>
+              <div className="flex flex-col gap-2">
+                <label className="text-[14px] font-medium text-core-text">Logo URL (light mode header)</label>
+                <input
+                  type="url"
+                  placeholder="https://…/logo-light.svg"
+                  value={logoUrl}
+                  onChange={(e) => setLogoUrl(e.target.value)}
+                  className="w-full rounded border border-core-border bg-core-bg px-3 py-2 text-[13px] text-core-text"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-[14px] font-medium text-core-text">
+                  Logo URL (dark mode header) — optional, falls back to light-mode logo
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://…/logo-dark.svg"
+                  value={logoUrlDark}
+                  onChange={(e) => setLogoUrlDark(e.target.value)}
+                  className="w-full rounded border border-core-border bg-core-bg px-3 py-2 text-[13px] text-core-text"
+                />
+              </div>
+              {(logoUrl || logoUrlDark) && (
+                <div className="flex gap-4">
+                  {logoUrl && (
+                    <div className="flex flex-col items-center gap-1 rounded border border-core-border bg-white p-3">
+                      <img src={logoUrl} alt="Light logo preview" className="h-8" />
+                      <span className="text-[11px] text-core-text-muted">Light</span>
+                    </div>
+                  )}
+                  {logoUrlDark && (
+                    <div className="flex flex-col items-center gap-1 rounded border border-core-border bg-[#16171b] p-3">
+                      <img src={logoUrlDark} alt="Dark logo preview" className="h-8" />
+                      <span className="text-[11px] text-core-text-muted">Dark</span>
+                    </div>
+                  )}
+                </div>
+              )}
+              <div className="border-t border-core-border pt-2" />
               {EDITABLE_TOKENS.map((t) => (
                 <div key={t.key} className="flex items-center justify-between gap-4">
                   <label className="text-[14px] font-medium text-core-text">{t.label}</label>
